@@ -1,0 +1,114 @@
+#server-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.server-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  cursor: pointer;
+}
+
+/* Pill indicator */
+.server-pill {
+  position: absolute;
+  left: -16px;
+  width: 4px;
+  background-color: var(--text-normal);
+  border-radius: 0 4px 4px 0;
+  height: 0;
+  transition: height 0.2s, top 0.2s;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.server-item:hover .server-pill {
+  height: 20px;
+}
+
+.server-item.active .server-pill {
+  height: 40px;
+}
+
+/* Server icon base */
+.server-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: border-radius 0.15s ease-out, background-color 0.15s;
+  color: var(--channels-default);
+  font-weight: 600;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.server-item:hover .server-icon,
+.server-item.active .server-icon {
+  border-radius: 16px;
+}
+
+.server-icon-home {
+  background-color: var(--brand);
+  color: #fff;
+}
+
+.server-item:hover .server-icon-home,
+.server-item.active .server-icon-home {
+  background-color: var(--brand-hover);
+}
+
+.server-item.active .server-icon:not(.server-icon-home) {
+  background-color: var(--brand);
+  color: #fff;
+}
+
+.server-item:hover .server-icon:not(.server-icon-home):not(.server-icon-add):not(.server-icon-discover) {
+  background-color: var(--server-color, var(--brand));
+  color: #fff;
+}
+
+.server-abbr {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+}
+
+/* Add / Discover */
+.server-icon-add,
+.server-icon-discover {
+  background-color: var(--bg-secondary);
+  color: var(--status-online);
+  transition: border-radius 0.15s ease-out, background-color 0.15s, color 0.15s;
+}
+
+.server-item:hover .server-icon-add,
+.server-item:hover .server-icon-discover {
+  border-radius: 16px;
+  background-color: var(--status-online);
+  color: #fff;
+}
+
+/* Separator */
+.server-separator {
+  width: 32px;
+  height: 2px;
+  background-color: var(--separator);
+  border-radius: 1px;
+  list-style: none;
+  flex-shrink: 0;
+}
+
+/* Tooltip via title attribute — handled natively */

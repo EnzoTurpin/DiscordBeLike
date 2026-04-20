@@ -1,0 +1,62 @@
+#titlebar {
+  height: var(--titlebar-height);
+  background-color: var(--bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  -webkit-app-region: drag;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 100;
+}
+
+.titlebar-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+.titlebar-controls {
+  display: flex;
+  height: 100%;
+  -webkit-app-region: no-drag;
+}
+
+.titlebar-controls button {
+  width: 46px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--interactive-normal);
+  transition: background-color 0.1s, color 0.1s;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.titlebar-controls button:hover {
+  background-color: var(--bg-modifier-hover);
+  color: var(--interactive-hover);
+}
+
+.titlebar-controls button:active {
+  background-color: var(--bg-modifier-active);
+}
+
+#btn-close:hover {
+  background-color: #ed4245;
+  color: #fff;
+}
+
+#btn-close:active {
+  background-color: #c03537;
+}
+
+.titlebar-controls svg {
+  pointer-events: none;
+}
