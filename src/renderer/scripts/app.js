@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initTitlebar();
   initServerList();
   initStatusMenu();
+  initThemeToggle();
   selectServer('home');
 });
 
@@ -137,11 +138,25 @@ function initStatusMenu() {
 
   document.getElementById('user-panel').appendChild(menu);
 
-  indicator.style.cursor = 'pointer';
-  indicator.addEventListener('click', (e) => {
+  const avatarWrapper = document.querySelector('.user-avatar-wrapper');
+  avatarWrapper.style.cursor = 'pointer';
+  avatarWrapper.addEventListener('click', (e) => {
     e.stopPropagation();
     menu.classList.toggle('hidden');
   });
 
   document.addEventListener('click', () => menu.classList.add('hidden'));
+}
+
+function initThemeToggle() {
+  const btn = document.querySelector('.btn-theme-toggle');
+  let isDark = true;
+
+  btn.addEventListener('click', () => {
+    isDark = !isDark;
+    document.body.classList.toggle('light-theme', !isDark);
+    btn.title = isDark ? 'Mode clair' : 'Mode sombre';
+    btn.querySelector('.icon-moon').style.display = isDark ? 'block' : 'none';
+    btn.querySelector('.icon-sun').style.display = isDark ? 'none' : 'block';
+  });
 }
