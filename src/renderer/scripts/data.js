@@ -131,7 +131,6 @@ const SERVERS = [
 
 const CURRENT_USER = {
   name: 'Utilisateur',
-  tag: '#0001',
   status: 'online',
   avatar: 'U',
 };

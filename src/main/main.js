@@ -102,7 +102,9 @@ function buildContextMenu(context) {
       { label: 'Inviter des personnes', click: () => {} },
       { label: 'Paramètres du serveur', click: () => {} },
       { type: 'separator' },
-      { label: 'Quitter le serveur', click: () => {}, role: undefined },
+      { label: 'Supprimer le serveur', click: () => {
+        BrowserWindow.fromWebContents(event.sender)?.webContents.send('delete-server', context.id);
+      }},
     ],
     channel: [
       { label: 'Marquer comme lu', click: () => {} },
@@ -144,7 +146,6 @@ ipcMain.on('show-context-menu', (event, context) => {
 // IPC — config utilisateur
 ipcMain.handle('get-user-config', () => ({
   username: env.DISCORD_USERNAME || 'Utilisateur',
-  tag: env.DISCORD_TAG || '0000',
 }));
 
 app.whenReady().then(() => {

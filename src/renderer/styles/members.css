@@ -170,6 +170,6 @@
 }
 
 /* Server pill unread indicator */
-.server-item.has-unread .server-pill {
+.server-item.has-unread:not(.active) .server-pill {
   height: 8px;
 }

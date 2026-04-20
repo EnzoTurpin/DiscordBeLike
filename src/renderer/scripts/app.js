@@ -8,6 +8,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   initMembersToggle();
   initSearchBar();
   selectServer('home');
+
+  // Connexion temps réel
+  if (window._userConfig) {
+    initSocket(window._userConfig.username);
+  }
 });
 
 async function initUserPanel() {
@@ -62,6 +67,14 @@ function initTitlebar() {
     e.preventDefault();
     window.electronAPI.showContextMenu({ type: 'user' });
   });
+
+  window.electronAPI.onDeleteServer((id) => {
+    const idx = SERVERS.findIndex(s => s.id === id);
+    if (idx === -1) return;
+    SERVERS.splice(idx, 1);
+    document.querySelector(`.server-item[data-id="${id}"]`)?.remove();
+    if (activeServerId === id) selectServer('home');
+  });
 }
 
 function initChatInput() {
@@ -79,7 +92,12 @@ function initChatInput() {
   });
 
   input.addEventListener('input', () => {
-    if (activeChannelId) onUserTyping(activeChannelId);
+    if (!activeChannelId) return;
+    if (window._socketClient?.isRealDmChannel(activeChannelId)) {
+      window._socketClient.notifyTyping();
+    } else {
+      onUserTyping(activeChannelId);
+    }
   });
 }
 

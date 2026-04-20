@@ -1,0 +1,342 @@
+/* ─── Section amis réels ─── */
+
+.real-friends-section {
+  border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.06));
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.real-friends-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 8px 4px 8px;
+}
+
+.real-friends-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.real-friends-sublabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  padding: 8px 8px 2px 8px;
+  opacity: 0.7;
+}
+
+.add-friend-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 2px 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  position: relative;
+  transition: color 0.15s;
+}
+
+.add-friend-btn:hover {
+  color: var(--text-normal, #dcddde);
+}
+
+.request-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ed4245;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.real-friend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.1s;
+  margin: 1px 4px;
+}
+
+.real-friend-item:hover {
+  background: var(--bg-modifier-hover, rgba(255,255,255,0.06));
+}
+
+.real-friend-item.active {
+  background: var(--bg-modifier-selected, rgba(255,255,255,0.1));
+}
+
+.real-friend-item.has-unread .dm-name {
+  font-weight: 600;
+  color: var(--text-normal, #dcddde);
+}
+
+.real-friend-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.real-friend-tag {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.real-friend-pending {
+  opacity: 0.8;
+}
+
+.pending-actions {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.pending-btn {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.1s, border-color 0.1s;
+  color: var(--text-muted);
+}
+
+.pending-btn.accept {
+  color: #57f287;
+  border-color: #57f287;
+}
+
+.pending-btn.accept:hover {
+  background: #57f287;
+  color: #fff;
+}
+
+.pending-btn.decline {
+  color: #ed4245;
+  border-color: #ed4245;
+}
+
+.pending-btn.decline:hover {
+  background: #ed4245;
+  color: #fff;
+}
+
+.real-friends-empty {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 8px 12px;
+  font-style: italic;
+}
+
+/* ─── Modal ajouter ami ─── */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.15s ease;
+}
+
+.modal-box {
+  background: #313338;
+  border-radius: 8px;
+  padding: 24px;
+  width: 440px;
+  max-width: 90vw;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  animation: slideUp 0.15s ease;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 18px;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.1s;
+}
+
+.modal-close:hover { color: #fff; }
+
+.modal-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.modal-desc strong {
+  color: #fff;
+  font-family: monospace;
+  background: rgba(255,255,255,0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.modal-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.modal-input {
+  flex: 1;
+  background: #1e1f22;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 4px;
+  color: #fff;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.modal-input:focus {
+  border-color: #5865f2;
+}
+
+.modal-input::placeholder {
+  color: var(--text-muted);
+}
+
+.modal-submit {
+  background: #5865f2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.modal-submit:hover { background: #4752c4; }
+
+.modal-error {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #ed4245;
+}
+
+/* ─── Badge connexion serveur ─── */
+
+.socket-status-badge {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-left: auto;
+  cursor: help;
+}
+
+.socket-status-badge[data-status="online"] {
+  background: #57f287;
+  box-shadow: 0 0 4px #57f287;
+}
+
+.socket-status-badge[data-status="offline"] {
+  background: #747f8d;
+}
+
+/* ─── Toast ─── */
+
+.socket-toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: #313338;
+  color: #dcddde;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  border-left: 4px solid #5865f2;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 9998;
+  max-width: 400px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.socket-toast.error {
+  border-left-color: #ed4245;
+}
+
+.socket-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ─── Loading DM ─── */
+
+.real-dm-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* ─── Animations ─── */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}

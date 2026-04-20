@@ -5,7 +5,12 @@
   "main": "src/main/main.js",
   "scripts": {
     "start": "electron .",
-    "dev": "electron . --enable-logging"
+    "dev": "electron . --enable-logging",
+    "server": "node server/index.js",
+    "server:dev": "node --watch server/index.js"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.8.3"
   },
   "devDependencies": {
     "electron": "^28.3.0"

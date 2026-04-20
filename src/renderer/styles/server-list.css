@@ -41,22 +41,17 @@
 .server-icon {
   width: 48px;
   height: 48px;
-  border-radius: 50%;
+  border-radius: 16px;
   background-color: var(--bg-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  transition: border-radius 0.15s ease-out, background-color 0.15s;
+  transition: background-color 0.15s;
   color: var(--channels-default);
   font-weight: 600;
   font-size: 18px;
   flex-shrink: 0;
-}
-
-.server-item:hover .server-icon,
-.server-item.active .server-icon {
-  border-radius: 16px;
 }
 
 .server-icon-home {
@@ -91,12 +86,11 @@
 .server-icon-discover {
   background-color: var(--bg-secondary);
   color: var(--status-online);
-  transition: border-radius 0.15s ease-out, background-color 0.15s, color 0.15s;
+  transition: background-color 0.15s, color 0.15s;
 }
 
 .server-item:hover .server-icon-add,
 .server-item:hover .server-icon-discover {
-  border-radius: 16px;
   background-color: var(--status-online);
   color: #fff;
 }
@@ -112,3 +106,156 @@
 }
 
 /* Tooltip via title attribute — handled natively */
+
+/* ─── Drag & Drop ─── */
+[data-draggable="true"] {
+  cursor: grab;
+}
+
+.server-item.dragging {
+  opacity: 0.25;
+}
+
+.server-item.dnd-into .server-icon {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.dnd-insert-line {
+  position: fixed;
+  height: 3px;
+  background: var(--brand);
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.dnd-insert-line::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: -3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--brand);
+}
+
+/* ─── Folder icon ─── */
+.server-folder-icon {
+  transition: filter 0.15s, background-color 0.15s;
+}
+
+.server-folder-item:hover .server-folder-icon {
+  filter: brightness(1.15);
+}
+
+/* ─── Folder children ─── */
+.server-item--child::before {
+  content: '';
+  position: absolute;
+  left: -3px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--folder-color, var(--brand));
+  border-radius: 1px;
+  opacity: 0.6;
+}
+
+/* ─── Folder context menu ─── */
+.folder-ctx-menu {
+  position: fixed;
+  background: var(--bg-floating);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  padding: 6px 0;
+  min-width: 192px;
+  z-index: 9999;
+}
+
+.folder-ctx-item {
+  padding: 6px 12px;
+  font-size: 14px;
+  color: var(--interactive-normal);
+  cursor: pointer;
+}
+
+.folder-ctx-item:hover {
+  background: var(--brand);
+  color: white;
+}
+
+.folder-ctx-danger:hover {
+  background: var(--mention-badge);
+}
+
+.folder-ctx-separator {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 4px 0;
+}
+
+.folder-ctx-label {
+  padding: 4px 12px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.folder-color-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 12px 8px;
+  align-items: center;
+}
+
+.folder-color-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.1s;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.folder-color-swatch:hover {
+  transform: scale(1.2);
+}
+
+.folder-color-swatch.active {
+  outline-color: white;
+}
+
+.folder-color-custom {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg-modifier-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: transform 0.1s, color 0.1s;
+}
+
+.folder-color-custom:hover {
+  transform: scale(1.2);
+  color: var(--text-normal);
+}
+
+.folder-color-custom input[type="color"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}

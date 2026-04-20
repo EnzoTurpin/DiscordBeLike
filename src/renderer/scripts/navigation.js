@@ -25,6 +25,17 @@ function _markAsRead(channelId) {
   _saveReadState();
 }
 
+function _updateServerUnreadState(serverId) {
+  const server = getServerById(serverId);
+  if (!server || server.type === 'home') return;
+  const serverEl = document.querySelector(`.server-item[data-id="${serverId}"]`);
+  if (!serverEl) return;
+  const hasUnread = server.categories?.some((cat) =>
+    cat.channels.some((ch) => ch.type === 'text' && _getUnreadCount(ch.id) > 0)
+  );
+  serverEl.classList.toggle('has-unread', hasUnread);
+}
+
 function setTitlebarTitle(title) {
   document.querySelector('.titlebar-title').textContent = title;
 }
@@ -74,7 +85,8 @@ function selectChannel(channelId, channelName, channelType) {
     chEl.querySelector('.unread-badge')?.remove();
   }
 
-  if (channelType === 'dm') _markAsRead(channelId);
+  _markAsRead(channelId);
+  _updateServerUnreadState(activeServerId);
 
   const server = getServerById(activeServerId);
   if (server) {
@@ -113,12 +125,15 @@ function renderChannelSidebar(server) {
 }
 
 function renderDmList(server, container) {
+  // Section amis réels (socket)
+  renderRealFriendsSection(container);
+
   const section = document.createElement('div');
   section.className = 'dm-section';
 
   const label = document.createElement('div');
   label.className = 'dm-section-label';
-  label.textContent = 'MESSAGES PRIVÉS';
+  label.textContent = 'MESSAGES PRIVÉS (DÉMO)';
   section.appendChild(label);
 
   server.channels.forEach((dm) => {
@@ -182,6 +197,8 @@ function renderCategoryList(server, container) {
       chEl.className = 'channel-item';
       chEl.dataset.id = ch.id;
       chEl.dataset.type = ch.type;
+
+      if (ch.type === 'text' && _getUnreadCount(ch.id) > 0) chEl.classList.add('has-unread');
 
       const icon = ch.type === 'voice' ? ICONS.voice : ICONS.text;
       chEl.innerHTML = `
