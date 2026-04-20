@@ -135,6 +135,10 @@ function buildGroupEl(msg) {
   avatarEl.style.backgroundColor = color;
   avatarEl.textContent = msg.avatar;
   avatarEl.title = msg.author;
+  avatarEl.addEventListener('click', (e) => {
+    e.stopPropagation();
+    showProfilePopup(msg, avatarEl, color);
+  });
 
   const content = document.createElement('div');
   content.className = 'message-group-content';
@@ -245,6 +249,69 @@ function sendMessage(content) {
   appendNewMessage(_currentChannelId, msg);
   clearReplyTarget();
   hideTypingIndicator();
+}
+
+// ─── Profile popup ───
+
+const _FAKE_STATUS_LABELS = {
+  online: 'En ligne',
+  idle: 'Inactif',
+  dnd: 'Ne pas déranger',
+  offline: 'Hors ligne',
+};
+
+function showProfilePopup(msg, anchorEl, color) {
+  closeProfilePopup();
+
+  // Find member data if available
+  const allMembers = Object.values(SERVER_MEMBERS).flatMap(s => [...(s.online || []), ...(s.offline || [])]);
+  const memberData = allMembers.find(m => m.id === msg.authorId) || null;
+  const status = memberData?.status || (msg.authorId === 'me' ? 'online' : 'online');
+
+  const popup = document.createElement('div');
+  popup.id = 'profile-popup';
+  popup.className = 'profile-popup';
+  popup.innerHTML = `
+    <div class="profile-popup-banner" style="background-color:${color}"></div>
+    <div class="profile-popup-body">
+      <div class="profile-popup-avatar-wrap">
+        <div class="profile-popup-avatar" style="background-color:${color}">${msg.avatar}</div>
+        <div class="profile-popup-status-ring">
+          <div class="profile-popup-status-dot status-${status}"></div>
+        </div>
+      </div>
+      <div class="profile-popup-name">${processContent(msg.author)}</div>
+      ${memberData?.role ? `<div class="profile-popup-role">${processContent(memberData.role)}</div>` : ''}
+      <div class="profile-popup-status-text">${_FAKE_STATUS_LABELS[status] || 'En ligne'}</div>
+      <div class="profile-popup-divider"></div>
+      <div class="profile-popup-section-title">À PROPOS</div>
+      <div class="profile-popup-about">Membre actif du serveur.</div>
+    </div>
+  `;
+
+  document.body.appendChild(popup);
+
+  // Position popup to the right of anchor, clamped to viewport
+  const rect = anchorEl.getBoundingClientRect();
+  let top = rect.top;
+  let left = rect.right + 16;
+
+  const pw = 240;
+  const ph = 280;
+  if (left + pw > window.innerWidth) left = rect.left - pw - 8;
+  if (top + ph > window.innerHeight) top = window.innerHeight - ph - 8;
+  if (top < 8) top = 8;
+
+  popup.style.top = `${top}px`;
+  popup.style.left = `${left}px`;
+
+  setTimeout(() => {
+    document.addEventListener('click', closeProfilePopup, { once: true });
+  }, 0);
+}
+
+function closeProfilePopup() {
+  document.getElementById('profile-popup')?.remove();
 }
 
 // ─── Reactions ───
