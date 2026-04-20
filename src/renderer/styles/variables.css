@@ -1,0 +1,94 @@
+:root {
+  /* Backgrounds */
+  --bg-primary: #313338;
+  --bg-secondary: #2b2d31;
+  --bg-tertiary: #1e1f22;
+  --bg-secondary-alt: #232428;
+  --bg-input: #383a40;
+  --bg-modifier-hover: rgba(79, 84, 92, 0.16);
+  --bg-modifier-active: rgba(79, 84, 92, 0.24);
+  --bg-modifier-selected: rgba(79, 84, 92, 0.32);
+  --bg-floating: #111214;
+
+  /* Text */
+  --text-normal: #f2f3f5;
+  --text-muted: #949ba4;
+  --text-link: #00a8fc;
+  --header-primary: #f2f3f5;
+  --header-secondary: #b5bac1;
+  --channels-default: #949ba4;
+
+  /* Interactive */
+  --interactive-normal: #b5bac1;
+  --interactive-hover: #dbdee1;
+  --interactive-active: #f2f3f5;
+  --interactive-muted: #4e5058;
+
+  /* Brand */
+  --brand: #5865f2;
+  --brand-hover: #4752c4;
+  --brand-active: #3c45a5;
+
+  /* Status */
+  --status-online: #23a559;
+  --status-idle: #f0b132;
+  --status-dnd: #ed4245;
+  --status-offline: #80848e;
+
+  /* Misc */
+  --separator: #3f4147;
+  --mention-badge: #ed4245;
+
+  /* Dimensions */
+  --titlebar-height: 30px;
+  --server-sidebar-width: 72px;
+  --channel-sidebar-width: 240px;
+  --user-panel-height: 52px;
+  --chat-header-height: 48px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  font-family: 'gg sans', 'Noto Sans', Whitney, 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;
+  font-size: 15px;
+  color: var(--text-normal);
+  background-color: var(--bg-primary);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  border: 2px solid var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #1a1b1e;
+}

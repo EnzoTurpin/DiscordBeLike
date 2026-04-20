@@ -1,0 +1,13 @@
+{
+  "name": "discord-be-like",
+  "version": "0.1.0",
+  "description": "Réplique visuelle de Discord avec Electron",
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --enable-logging"
+  },
+  "devDependencies": {
+    "electron": "^28.3.0"
+  }
+}
