@@ -183,23 +183,55 @@ function _applyDropResult(dragId, result) {
 
 // ── Context menu ──────────────────────────────────────────────────────────────
 
+const _FOLDER_COLORS = [
+  '#1ABC9C', '#2ECC71', '#3498DB', '#9B59B6', '#E91E63',
+  '#F1C40F', '#E67E22', '#E74C3C', '#5865F2', '#EB459E',
+  '#57F287', '#FEE75C', '#ED4245', '#607D8B', '#95A5A6',
+];
+
+function _changeFolderColor(folderId, color) {
+  const folder = _listState.find(item => item.id === folderId);
+  if (folder?.type === 'folder') {
+    folder.color = color;
+    _saveListState();
+    renderServerList();
+  }
+}
+
 function _showFolderCtxMenu(e, folderId) {
   document.querySelectorAll('.folder-ctx-menu').forEach(m => m.remove());
   const folder = _listState.find(item => item.id === folderId);
   if (!folder) return;
 
+  const swatches = _FOLDER_COLORS.map(c =>
+    `<div class="folder-color-swatch${c === folder.color ? ' active' : ''}" data-color="${c}" style="background:${c}"></div>`
+  ).join('');
+
   const menu = document.createElement('div');
   menu.className = 'folder-ctx-menu';
-  menu.style.left = Math.min(e.clientX, window.innerWidth - 180) + 'px';
-  menu.style.top = Math.min(e.clientY, window.innerHeight - 80) + 'px';
+  menu.style.left = Math.min(e.clientX, window.innerWidth - 200) + 'px';
+  menu.style.top = Math.min(e.clientY, window.innerHeight - 180) + 'px';
   menu.innerHTML = `
     <div class="folder-ctx-item" data-action="rename">Renommer</div>
+    <div class="folder-ctx-separator"></div>
+    <div class="folder-ctx-label">Couleur du dossier</div>
+    <div class="folder-color-picker">${swatches}
+      <label class="folder-color-custom" title="Couleur personnalisée">
+        <input type="color" value="${folder.color}" />
+        <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+      </label>
+    </div>
+    <div class="folder-ctx-separator"></div>
     <div class="folder-ctx-item folder-ctx-danger" data-action="dissolve">Dissoudre le dossier</div>
   `;
   document.body.appendChild(menu);
+
   const close = () => menu.remove();
+
   menu.addEventListener('click', ev => {
     const action = ev.target.closest('[data-action]')?.dataset.action;
+    const swatch = ev.target.closest('.folder-color-swatch');
+
     if (action === 'rename') {
       close();
       const name = prompt('Nom du dossier :', folder.name);
@@ -207,8 +239,19 @@ function _showFolderCtxMenu(e, folderId) {
     } else if (action === 'dissolve') {
       close();
       _dissolveFolder(folderId);
+    } else if (swatch) {
+      _changeFolderColor(folderId, swatch.dataset.color);
+      close();
     }
   });
+
+  // Custom color input
+  const colorInput = menu.querySelector('input[type="color"]');
+  colorInput.addEventListener('input', ev => {
+    _changeFolderColor(folderId, ev.target.value);
+  });
+  colorInput.addEventListener('change', () => close());
+
   setTimeout(() => document.addEventListener('click', close, { once: true }), 0);
 }
 
@@ -262,20 +305,11 @@ function _buildFolderEl(folder) {
 
   const icon = document.createElement('div');
   icon.className = 'server-icon server-folder-icon';
-  icon.style.setProperty('--folder-color', folder.color);
+  icon.style.background = folder.color;
+  icon.innerHTML = `<svg viewBox="0 0 24 24" width="26" height="26" fill="none">
+    <path fill="rgba(255,255,255,0.9)" d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z"/>
+  </svg>`;
 
-  const grid = document.createElement('div');
-  grid.className = 'folder-mini-grid';
-  folder.serverIds.slice(0, 4).forEach(sid => {
-    const s = getServerById(sid);
-    const mini = document.createElement('div');
-    mini.className = 'folder-mini-icon';
-    mini.style.background = s?.color ?? '#5865F2';
-    mini.textContent = s?.abbr?.[0] ?? '?';
-    grid.appendChild(mini);
-  });
-
-  icon.appendChild(grid);
   li.appendChild(icon);
 
   li.addEventListener('click', () => {

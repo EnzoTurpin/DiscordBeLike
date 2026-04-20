@@ -143,31 +143,11 @@
 
 /* ─── Folder icon ─── */
 .server-folder-icon {
-  background: var(--bg-secondary-alt) !important;
-  padding: 7px;
+  transition: filter 0.15s, background-color 0.15s;
 }
 
-.server-folder-item.is-expanded .server-folder-icon {
-  background: var(--bg-primary) !important;
-}
-
-.folder-mini-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2px;
-  width: 100%;
-  height: 100%;
-}
-
-.folder-mini-icon {
-  border-radius: 2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 7px;
-  font-weight: 800;
-  color: rgba(255, 255, 255, 0.9);
-  line-height: 1;
+.server-folder-item:hover .server-folder-icon {
+  filter: brightness(1.15);
 }
 
 /* ─── Folder children ─── */
@@ -188,10 +168,10 @@
   position: fixed;
   background: var(--bg-floating);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 4px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   padding: 6px 0;
-  min-width: 160px;
+  min-width: 192px;
   z-index: 9999;
 }
 
@@ -200,7 +180,6 @@
   font-size: 14px;
   color: var(--interactive-normal);
   cursor: pointer;
-  border-radius: 2px;
 }
 
 .folder-ctx-item:hover {
@@ -210,4 +189,73 @@
 
 .folder-ctx-danger:hover {
   background: var(--mention-badge);
+}
+
+.folder-ctx-separator {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 4px 0;
+}
+
+.folder-ctx-label {
+  padding: 4px 12px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.folder-color-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 12px 8px;
+  align-items: center;
+}
+
+.folder-color-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.1s;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.folder-color-swatch:hover {
+  transform: scale(1.2);
+}
+
+.folder-color-swatch.active {
+  outline-color: white;
+}
+
+.folder-color-custom {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg-modifier-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: transform 0.1s, color 0.1s;
+}
+
+.folder-color-custom:hover {
+  transform: scale(1.2);
+  color: var(--text-normal);
+}
+
+.folder-color-custom input[type="color"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
 }
