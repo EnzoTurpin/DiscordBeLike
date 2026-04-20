@@ -1,0 +1,175 @@
+/* ─── Chat layout with members panel ─── */
+#chat-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+#chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ─── Members panel ─── */
+#members-panel {
+  width: 0;
+  overflow: hidden;
+  background-color: var(--bg-secondary);
+  border-left: 1px solid var(--bg-tertiary);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.2s ease;
+  flex-shrink: 0;
+}
+
+#members-panel.open {
+  width: 240px;
+}
+
+.members-panel-header {
+  height: 48px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--header-primary);
+  border-bottom: 1px solid var(--bg-tertiary);
+  flex-shrink: 0;
+}
+
+#members-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+/* ─── Members section ─── */
+.members-section {
+  margin-bottom: 8px;
+}
+
+.members-section-header {
+  padding: 16px 8px 4px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--channels-default);
+}
+
+/* ─── Member item ─── */
+.member-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  margin: 1px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.1s;
+}
+
+.member-item:hover {
+  background-color: var(--bg-modifier-hover);
+}
+
+.member-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.member-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.member-status-dot {
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--bg-secondary);
+}
+
+.member-status-dot.status-online  { background-color: var(--status-online); }
+.member-status-dot.status-idle    { background-color: var(--status-idle); }
+.member-status-dot.status-dnd     { background-color: var(--status-dnd); }
+.member-status-dot.status-offline { background-color: var(--status-offline); }
+
+.member-info {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.member-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--interactive-normal);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.member-item:hover .member-name {
+  color: var(--interactive-hover);
+}
+
+.member-role {
+  font-size: 11px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.members-empty {
+  padding: 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* ─── Unread badges ─── */
+.unread-badge {
+  background-color: var(--mention-badge);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 1px 5px;
+  min-width: 16px;
+  text-align: center;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+
+.channel-item.has-unread .channel-name-text {
+  color: var(--header-primary);
+  font-weight: 600;
+}
+
+.channel-item.has-unread .channel-icon {
+  color: var(--interactive-normal);
+}
+
+/* Server pill unread indicator */
+.server-item.has-unread .server-pill {
+  height: 8px;
+}

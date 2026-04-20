@@ -1,5 +1,33 @@
 let activeServerId = 'home';
 let activeChannelId = null;
+let _activeChannelType = null;
+let _activeChannelName = null;
+
+// ─── Read state (persisté en localStorage) ───
+const _readState = JSON.parse(localStorage.getItem('discord-read-state') || '{}');
+
+function _saveReadState() {
+  localStorage.setItem('discord-read-state', JSON.stringify(_readState));
+}
+
+function _getDmMessageCount(channelId) {
+  return (MOCK_MESSAGES[channelId] || []).length;
+}
+
+function _getUnreadCount(channelId) {
+  const total = _getDmMessageCount(channelId);
+  const read = _readState[channelId] ?? 0;
+  return Math.max(0, total - read);
+}
+
+function _markAsRead(channelId) {
+  _readState[channelId] = _getDmMessageCount(channelId);
+  _saveReadState();
+}
+
+function setTitlebarTitle(title) {
+  document.querySelector('.titlebar-title').textContent = title;
+}
 
 function selectServer(serverId) {
   activeServerId = serverId;
@@ -12,7 +40,15 @@ function selectServer(serverId) {
   const server = getServerById(serverId);
   if (!server) return;
 
+  setTitlebarTitle(server.name);
   renderChannelSidebar(server);
+
+  // Close members panel when switching server
+  closeMembersPanel();
+
+  // Show/hide members button depending on server type
+  const membersBtn = document.getElementById('btn-members');
+  if (membersBtn) membersBtn.style.display = server.type === 'home' ? 'none' : 'flex';
 
   const defaultChannel = getDefaultChannel(server);
   if (defaultChannel) {
@@ -24,12 +60,42 @@ function selectServer(serverId) {
 
 function selectChannel(channelId, channelName, channelType) {
   activeChannelId = channelId;
+  _activeChannelType = channelType;
+  _activeChannelName = channelName;
 
   document.querySelectorAll('.channel-item, .dm-item').forEach((el) => {
     el.classList.toggle('active', el.dataset.id === channelId);
   });
 
+  // Clear unread on selected channel
+  const chEl = document.querySelector(`[data-id="${channelId}"]`);
+  if (chEl) {
+    chEl.classList.remove('has-unread');
+    chEl.querySelector('.unread-badge')?.remove();
+  }
+
+  if (channelType === 'dm') _markAsRead(channelId);
+
+  const server = getServerById(activeServerId);
+  if (server) {
+    const prefix = channelType === 'dm' ? '' : '#';
+    setTitlebarTitle(`${server.name} — ${prefix}${channelName}`);
+  }
+
   updateChatHeader(channelId, channelName, channelType);
+
+  if (channelType === 'voice') {
+    showVoiceConnectedBar(channelName);
+  } else {
+    renderMessages(channelId, channelName, channelType);
+  }
+
+  // Update input placeholder
+  const input = document.getElementById('message-input');
+  if (input) {
+    const prefix = channelType === 'dm' ? '' : '#';
+    input.dataset.placeholder = `Envoyer un message à ${prefix}${channelName}`;
+  }
 }
 
 function renderChannelSidebar(server) {
@@ -60,12 +126,16 @@ function renderDmList(server, container) {
     item.className = 'dm-item channel-item';
     item.dataset.id = dm.id;
 
+    const unread = _getUnreadCount(dm.id);
+    if (unread > 0) item.classList.add('has-unread');
+
     item.innerHTML = `
       <div class="dm-avatar">
         <span class="dm-avatar-text">${dm.avatar}</span>
         <span class="dm-status status-${dm.status}"></span>
       </div>
       <span class="dm-name">${dm.name}</span>
+      ${unread > 0 ? `<span class="unread-badge">${unread}</span>` : ''}
       <button class="dm-close-btn" title="Fermer">✕</button>
     `;
 
@@ -151,35 +221,114 @@ function toggleCategory(catEl) {
   catEl.classList.toggle('collapsed');
 }
 
+// ─── Voice connected bar ───
+
+let _connectedVoiceChannel = null;
+
+function showVoiceConnectedBar(channelName) {
+  _connectedVoiceChannel = channelName;
+
+  let bar = document.getElementById('voice-bar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'voice-bar';
+    const userPanel = document.getElementById('user-panel');
+    userPanel.parentNode.insertBefore(bar, userPanel);
+  }
+
+  bar.innerHTML = `
+    <div class="voice-bar-status">
+      <span class="voice-bar-dot"></span>
+      <span class="voice-bar-label">Vocal connecté</span>
+    </div>
+    <div class="voice-bar-channel">${channelName}</div>
+    <div class="voice-bar-actions">
+      <button class="voice-bar-btn" title="Couper le son">
+        <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 3a1 1 0 00-1 1v4a1 1 0 002 0V4a1 1 0 00-1-1zM7 9a5 5 0 0010 0 1 1 0 00-2 0 3 3 0 01-6 0 1 1 0 00-2 0zm5 7a7 7 0 006.93-6H18a6 6 0 01-12 0H4.07A7 7 0 0012 16zm-1 2v2a1 1 0 002 0v-2a1 1 0 00-2 0z"/></svg>
+      </button>
+      <button class="voice-bar-btn" title="Partage d'écran">
+        <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M20 3H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h3l-1 1v2h12v-2l-1-1h3c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 13H4V5h16v11z"/></svg>
+      </button>
+      <button class="voice-bar-btn voice-bar-disconnect" title="Se déconnecter" id="voice-disconnect">
+        <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.99.99 0 01-.29-.7c0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.1-.7-.28-.79-.73-1.68-1.36-2.66-1.85a.996.996 0 01-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>
+      </button>
+    </div>
+  `;
+
+  bar.querySelector('#voice-disconnect').addEventListener('click', disconnectVoice);
+
+  // Show voice channel view
+  const container = document.getElementById('messages-container');
+  const staticEmpty = document.getElementById('chat-empty-state');
+  if (staticEmpty) staticEmpty.style.display = 'none';
+  container.innerHTML = `
+    <div class="voice-channel-view">
+      <div class="voice-channel-icon">
+        ${ICONS.voice}
+      </div>
+      <div class="voice-channel-title">${channelName}</div>
+      <div class="voice-channel-desc">Vous êtes connecté au salon vocal</div>
+      <div class="voice-participants">
+        <div class="voice-participant">
+          <div class="voice-participant-avatar" style="background-color:${getAvatarColor('me')}">
+            ${window._userConfig ? (window._userConfig.username.split(/\s+/).map(w => w[0]?.toUpperCase() ?? '').slice(0, 2).join('') || 'U') : 'U'}
+          </div>
+          <div class="voice-participant-speaking"></div>
+          <span class="voice-participant-name">${window._userConfig?.username || 'Utilisateur'}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function disconnectVoice() {
+  _connectedVoiceChannel = null;
+  document.getElementById('voice-bar')?.remove();
+  // Return to empty state
+  renderEmptyChatState();
+}
+
 function updateChatHeader(channelId, channelName, channelType) {
   const icon = document.getElementById('chat-header-icon');
   const name = document.getElementById('chat-header-name');
-  const input = document.getElementById('message-input');
-  const inputWrapper = document.getElementById('input-channel-name');
-  const emptyState = document.getElementById('chat-empty-state');
+  const topic = document.getElementById('chat-header-topic');
 
   const iconSvg = channelType === 'voice' ? ICONS.voice : (channelType === 'dm' ? ICONS.dm : ICONS.text);
   icon.innerHTML = iconSvg;
   name.textContent = channelName;
 
-  if (inputWrapper) inputWrapper.textContent = `Envoyer un message à ${channelType === 'dm' ? '' : '#'}${channelName}`;
-
-  if (emptyState) {
-    emptyState.querySelector('.empty-icon').innerHTML = iconSvg;
-    emptyState.querySelector('.empty-title').textContent =
-      channelType === 'dm' ? `Début de votre conversation avec ${channelName}` : `Bienvenue dans #${channelName} !`;
-    emptyState.querySelector('.empty-desc').textContent =
-      channelType === 'dm'
-        ? `C'est le début de votre histoire avec ${channelName}.`
-        : `C'est le début du salon #${channelName}.`;
+  if (topic) {
+    topic.textContent = channelType === 'dm'
+      ? `Conversation privée avec ${channelName}`
+      : channelType === 'voice'
+        ? 'Salon vocal'
+        : `Salon texte #${channelName}`;
   }
 }
 
 function renderEmptyChatState() {
   const name = document.getElementById('chat-header-name');
   const icon = document.getElementById('chat-header-icon');
+  const container = document.getElementById('messages-container');
+
   name.textContent = 'Sélectionnez un salon';
   icon.innerHTML = '';
+
+  if (container) {
+    container.innerHTML = '';
+    const staticEmpty = document.getElementById('chat-empty-state');
+    if (!staticEmpty) {
+      container.innerHTML = `
+        <div id="chat-empty-state">
+          <div class="empty-icon-wrapper"><span class="empty-icon"></span></div>
+          <div class="empty-title">Bienvenue !</div>
+          <div class="empty-desc">Sélectionnez un salon pour commencer.</div>
+        </div>
+      `;
+    } else {
+      staticEmpty.style.display = 'flex';
+    }
+  }
 }
 
 const ICONS = {
