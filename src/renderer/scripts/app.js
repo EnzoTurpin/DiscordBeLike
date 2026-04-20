@@ -136,6 +136,24 @@ function initStatusMenu() {
     menu.appendChild(item);
   });
 
+  const separator = document.createElement('div');
+  separator.className = 'status-menu-separator';
+  menu.appendChild(separator);
+
+  const switchBtn = document.createElement('button');
+  switchBtn.className = 'status-menu-item status-menu-switch';
+  switchBtn.innerHTML = `
+    <svg viewBox="0 0 24 24" width="14" height="14" style="flex-shrink:0">
+      <path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+    </svg>
+    <span class="status-menu-label">Changer de compte</span>
+  `;
+  switchBtn.addEventListener('click', () => {
+    menu.classList.add('hidden');
+    openSwitchAccountModal();
+  });
+  menu.appendChild(switchBtn);
+
   document.getElementById('user-panel').appendChild(menu);
 
   const avatarWrapper = document.querySelector('.user-avatar-wrapper');
@@ -146,6 +164,51 @@ function initStatusMenu() {
   });
 
   document.addEventListener('click', () => menu.classList.add('hidden'));
+}
+
+function openSwitchAccountModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+
+  overlay.innerHTML = `
+    <div class="modal-box" id="switch-account-modal">
+      <div class="modal-header">
+        <span class="modal-title">Changer de compte</span>
+        <button class="modal-close" id="modal-close-btn">✕</button>
+      </div>
+      <div class="modal-body">
+        <label class="modal-label">Nom d'utilisateur</label>
+        <input class="modal-input" id="modal-username" type="text" placeholder="Nouveau nom…" maxlength="32" />
+        <label class="modal-label">Tag</label>
+        <input class="modal-input" id="modal-tag" type="text" placeholder="ex: #1234" maxlength="5" />
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-cancel" id="modal-cancel-btn">Annuler</button>
+        <button class="modal-btn modal-btn-confirm" id="modal-confirm-btn">Confirmer</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  const close = () => overlay.remove();
+
+  overlay.querySelector('#modal-close-btn').addEventListener('click', close);
+  overlay.querySelector('#modal-cancel-btn').addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+
+  overlay.querySelector('#modal-confirm-btn').addEventListener('click', () => {
+    const name = overlay.querySelector('#modal-username').value.trim();
+    const tag  = overlay.querySelector('#modal-tag').value.trim();
+    if (!name) return;
+
+    document.querySelector('.user-name').textContent = name;
+    document.querySelector('.user-tag').textContent = tag || '#0001';
+    document.querySelector('.user-avatar').textContent = name.charAt(0).toUpperCase();
+    close();
+  });
+
+  overlay.querySelector('#modal-username').focus();
 }
 
 function initThemeToggle() {
