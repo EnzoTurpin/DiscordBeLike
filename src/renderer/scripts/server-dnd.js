@@ -447,6 +447,9 @@ function _endDrag() {
   _drag = null;
 
   if (dropResult) _applyDropResult(id, dropResult);
+
+  // Reset _didDrag after any pending click events from this pointerup have fired
+  setTimeout(() => { _didDrag = false; }, 0);
 }
 
 function _calcDropTarget(list, dragId, clientX, clientY) {
