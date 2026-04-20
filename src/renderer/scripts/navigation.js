@@ -59,7 +59,12 @@ function selectChannel(channelId, channelName, channelType) {
   }
 
   updateChatHeader(channelId, channelName, channelType);
-  renderMessages(channelId, channelName, channelType);
+
+  if (channelType === 'voice') {
+    showVoiceConnectedBar(channelName);
+  } else {
+    renderMessages(channelId, channelName, channelType);
+  }
 
   // Update input placeholder
   const input = document.getElementById('message-input');
@@ -194,6 +199,73 @@ function renderCategoryList(server, container) {
 
 function toggleCategory(catEl) {
   catEl.classList.toggle('collapsed');
+}
+
+// ─── Voice connected bar ───
+
+let _connectedVoiceChannel = null;
+
+function showVoiceConnectedBar(channelName) {
+  _connectedVoiceChannel = channelName;
+
+  let bar = document.getElementById('voice-bar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'voice-bar';
+    const userPanel = document.getElementById('user-panel');
+    userPanel.parentNode.insertBefore(bar, userPanel);
+  }
+
+  bar.innerHTML = `
+    <div class="voice-bar-status">
+      <span class="voice-bar-dot"></span>
+      <span class="voice-bar-label">Vocal connecté</span>
+    </div>
+    <div class="voice-bar-channel">${channelName}</div>
+    <div class="voice-bar-actions">
+      <button class="voice-bar-btn" title="Couper le son">
+        <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 3a1 1 0 00-1 1v4a1 1 0 002 0V4a1 1 0 00-1-1zM7 9a5 5 0 0010 0 1 1 0 00-2 0 3 3 0 01-6 0 1 1 0 00-2 0zm5 7a7 7 0 006.93-6H18a6 6 0 01-12 0H4.07A7 7 0 0012 16zm-1 2v2a1 1 0 002 0v-2a1 1 0 00-2 0z"/></svg>
+      </button>
+      <button class="voice-bar-btn" title="Partage d'écran">
+        <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M20 3H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h3l-1 1v2h12v-2l-1-1h3c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 13H4V5h16v11z"/></svg>
+      </button>
+      <button class="voice-bar-btn voice-bar-disconnect" title="Se déconnecter" id="voice-disconnect">
+        <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.99.99 0 01-.29-.7c0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.1-.7-.28-.79-.73-1.68-1.36-2.66-1.85a.996.996 0 01-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>
+      </button>
+    </div>
+  `;
+
+  bar.querySelector('#voice-disconnect').addEventListener('click', disconnectVoice);
+
+  // Show voice channel view
+  const container = document.getElementById('messages-container');
+  const staticEmpty = document.getElementById('chat-empty-state');
+  if (staticEmpty) staticEmpty.style.display = 'none';
+  container.innerHTML = `
+    <div class="voice-channel-view">
+      <div class="voice-channel-icon">
+        ${ICONS.voice}
+      </div>
+      <div class="voice-channel-title">${channelName}</div>
+      <div class="voice-channel-desc">Vous êtes connecté au salon vocal</div>
+      <div class="voice-participants">
+        <div class="voice-participant">
+          <div class="voice-participant-avatar" style="background-color:${getAvatarColor('me')}">
+            ${window._userConfig ? (window._userConfig.username.split(/\s+/).map(w => w[0]?.toUpperCase() ?? '').slice(0, 2).join('') || 'U') : 'U'}
+          </div>
+          <div class="voice-participant-speaking"></div>
+          <span class="voice-participant-name">${window._userConfig?.username || 'Utilisateur'}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function disconnectVoice() {
+  _connectedVoiceChannel = null;
+  document.getElementById('voice-bar')?.remove();
+  // Return to empty state
+  renderEmptyChatState();
 }
 
 function updateChatHeader(channelId, channelName, channelType) {
