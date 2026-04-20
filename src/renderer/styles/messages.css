@@ -96,8 +96,7 @@
 .message-group {
   display: flex;
   gap: 16px;
-  padding: 2px 16px;
-  margin-bottom: 0;
+  padding: 16px 16px 2px;
   position: relative;
 }
 
@@ -519,6 +518,59 @@
   font-size: 14px;
   color: var(--text-normal);
   line-height: 1.4;
+}
+
+/* ─── Search overlay ─── */
+.search-overlay {
+  padding: 6px 16px;
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--separator);
+  flex-shrink: 0;
+  animation: slide-down 0.15s ease;
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.search-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--bg-tertiary);
+  border-radius: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--separator);
+}
+
+.search-bar-wrap:focus-within {
+  border-color: var(--brand);
+}
+
+.search-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: var(--text-normal);
+  caret-color: var(--text-normal);
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
 }
 
 /* ─── Chat header btn active state ─── */
