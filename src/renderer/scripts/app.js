@@ -16,10 +16,8 @@ async function initUserPanel() {
 
   const avatar = document.querySelector('#user-panel .user-avatar');
   const name = document.querySelector('#user-panel .user-name');
-  const tag = document.querySelector('#user-panel .user-tag');
 
   name.textContent = config.username;
-  tag.textContent = `#${config.tag}`;
 
   const initials = config.username
     .split(/\s+/)
@@ -28,7 +26,8 @@ async function initUserPanel() {
     .join('');
   avatar.textContent = initials || 'U';
 
-  // Update MOCK_MESSAGES 'me' author name to match config
+  ACCOUNTS[0].name = config.username;
+
   Object.values(MOCK_MESSAGES).forEach((msgs) => {
     msgs.forEach((m) => {
       if (m.authorId === 'me') {
