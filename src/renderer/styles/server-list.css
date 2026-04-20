@@ -108,21 +108,37 @@
 /* Tooltip via title attribute — handled natively */
 
 /* ─── Drag & Drop ─── */
+[data-draggable="true"] {
+  cursor: grab;
+}
+
 .server-item.dragging {
-  opacity: 0.3;
-}
-
-.server-item.dnd-above {
-  box-shadow: 0 -2px 0 0 var(--brand);
-}
-
-.server-item.dnd-below {
-  box-shadow: 0 2px 0 0 var(--brand);
+  opacity: 0.25;
 }
 
 .server-item.dnd-into .server-icon {
   outline: 2px solid var(--brand);
   outline-offset: 2px;
+}
+
+.dnd-insert-line {
+  position: fixed;
+  height: 3px;
+  background: var(--brand);
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.dnd-insert-line::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: -3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--brand);
 }
 
 /* ─── Folder icon ─── */

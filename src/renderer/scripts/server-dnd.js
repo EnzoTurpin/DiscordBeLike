@@ -1,7 +1,9 @@
 const _DND_KEY = 'discord-server-order';
+const _DRAG_THRESHOLD = 5;
 
 let _listState = null;
-let _dragId = null;
+let _didDrag = false;
+let _drag = null; // { id, itemEl, ghost, line, dropResult }
 
 // ── State ─────────────────────────────────────────────────────────────────────
 
@@ -9,8 +11,8 @@ function _loadListState() {
   try {
     const raw = localStorage.getItem(_DND_KEY);
     if (raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed;
+      const p = JSON.parse(raw);
+      if (Array.isArray(p)) return p;
     }
   } catch (_) {}
   return SERVERS.map(s => ({ type: 'server', id: s.id }));
@@ -29,13 +31,13 @@ function _syncWithServers() {
   SERVERS.forEach(s => {
     if (!known.has(s.id)) _listState.push({ type: 'server', id: s.id });
   });
-  const validIds = new Set(SERVERS.map(s => s.id));
+  const valid = new Set(SERVERS.map(s => s.id));
   for (let i = _listState.length - 1; i >= 0; i--) {
     const item = _listState[i];
-    if (item.type === 'server' && !validIds.has(item.id)) {
+    if (item.type === 'server' && !valid.has(item.id)) {
       _listState.splice(i, 1);
     } else if (item.type === 'folder') {
-      item.serverIds = item.serverIds.filter(id => validIds.has(id));
+      item.serverIds = item.serverIds.filter(id => valid.has(id));
       if (item.serverIds.length <= 1) {
         _listState.splice(i, 1, ...item.serverIds.map(id => ({ type: 'server', id })));
       }
@@ -82,17 +84,12 @@ function _toggleFolder(folderId) {
 }
 
 function _createFolder(idA, idB) {
-  const idxA = _listState.findIndex(item =>
-    item.id === idA || (item.type === 'folder' && item.serverIds.includes(idA))
+  const findIdx = id => _listState.findIndex(item =>
+    item.id === id || (item.type === 'folder' && item.serverIds.includes(id))
   );
-  const idxB = _listState.findIndex(item =>
-    item.id === idB || (item.type === 'folder' && item.serverIds.includes(idB))
-  );
-  const insertAt = Math.min(...[idxA, idxB].filter(i => i !== -1), _listState.length);
-
+  const insertAt = Math.min(...[findIdx(idA), findIdx(idB)].filter(i => i !== -1), _listState.length);
   _detach(idA);
   _detach(idB);
-
   const folder = {
     type: 'folder',
     id: 'folder-' + Date.now(),
@@ -101,7 +98,6 @@ function _createFolder(idA, idB) {
     serverIds: [idA, idB],
     expanded: true,
   };
-
   _listState.splice(Math.min(insertAt, _listState.length), 0, folder);
   _saveListState();
   renderServerList();
@@ -125,28 +121,40 @@ function _renameFolder(folderId, name) {
   }
 }
 
-function _applyDrop(dragId, targetId, zone, targetFolderId) {
-  if (dragId === targetId) return;
+// ── Drop application ──────────────────────────────────────────────────────────
 
-  if (zone === 'create-folder') {
-    if (_isTopLevelFolder(dragId) || _isTopLevelFolder(targetId)) return;
-    _createFolder(dragId, targetId);
+function _applyDropResult(dragId, result) {
+  if (!result) return;
+
+  if (result.type === 'into') {
+    const targetEl = result.el;
+    const targetId = targetEl.dataset.id;
+    const isFolder = targetEl.dataset.isFolder === 'true';
+
+    if (isFolder) {
+      if (_isTopLevelFolder(dragId)) return;
+      const folder = _listState.find(item => item.id === targetId && item.type === 'folder');
+      if (!folder || folder.serverIds.includes(dragId)) return;
+      _detach(dragId);
+      folder.serverIds.push(dragId);
+      _saveListState();
+      renderServerList();
+    } else {
+      if (_isTopLevelFolder(dragId)) return;
+      _createFolder(dragId, targetId);
+    }
     return;
   }
 
-  if (zone === 'into') {
-    const folderId = targetFolderId || targetId;
-    const folder = _listState.find(item => item.id === folderId && item.type === 'folder');
-    if (!folder || folder.serverIds.includes(dragId)) return;
-    _detach(dragId);
-    folder.serverIds.push(dragId);
-    _saveListState();
-    renderServerList();
-    return;
-  }
+  // 'gap' — reorder
+  const { before, after } = result;
+  const refEl = before || after;
+  if (!refEl) return;
 
-  // above / below
   const dragData = _getTopLevelItemData(dragId);
+  const targetId = refEl.dataset.id;
+  const targetFolderId = refEl.dataset.folderId || null;
+  const zone = before ? 'above' : 'below';
 
   if (targetFolderId && !_isTopLevelFolder(dragId)) {
     const folder = _listState.find(item => item.id === targetFolderId && item.type === 'folder');
@@ -189,7 +197,6 @@ function _showFolderCtxMenu(e, folderId) {
     <div class="folder-ctx-item folder-ctx-danger" data-action="dissolve">Dissoudre le dossier</div>
   `;
   document.body.appendChild(menu);
-
   const close = () => menu.remove();
   menu.addEventListener('click', ev => {
     const action = ev.target.closest('[data-action]')?.dataset.action;
@@ -212,7 +219,7 @@ function _buildServerEl(server, draggable, folderId, folderColor) {
   li.className = 'server-item';
   li.dataset.id = server.id;
   li.title = server.name;
-  if (draggable) li.setAttribute('draggable', 'true');
+  if (draggable) li.dataset.draggable = 'true';
   if (folderId) {
     li.dataset.folderId = folderId;
     li.classList.add('server-item--child');
@@ -231,7 +238,10 @@ function _buildServerEl(server, draggable, folderId, folderColor) {
     li.innerHTML += `<div class="server-icon" style="--server-color:${server.color}"><span class="server-abbr">${server.abbr}</span></div>`;
   }
 
-  li.addEventListener('click', () => selectServer(server.id));
+  li.addEventListener('click', () => {
+    if (_didDrag) { _didDrag = false; return; }
+    selectServer(server.id);
+  });
   li.addEventListener('contextmenu', e => {
     e.preventDefault();
     if (server.type !== 'home') window.electronAPI.showContextMenu({ type: 'server', id: server.id });
@@ -245,8 +255,8 @@ function _buildFolderEl(folder) {
   li.className = 'server-item server-folder-item' + (folder.expanded ? ' is-expanded' : '');
   li.dataset.id = folder.id;
   li.dataset.isFolder = 'true';
+  li.dataset.draggable = 'true';
   li.title = folder.name;
-  li.setAttribute('draggable', 'true');
 
   li.appendChild(Object.assign(document.createElement('div'), { className: 'server-pill' }));
 
@@ -268,7 +278,10 @@ function _buildFolderEl(folder) {
   icon.appendChild(grid);
   li.appendChild(icon);
 
-  li.addEventListener('click', () => _toggleFolder(folder.id));
+  li.addEventListener('click', () => {
+    if (_didDrag) { _didDrag = false; return; }
+    _toggleFolder(folder.id);
+  });
   li.addEventListener('contextmenu', e => { e.preventDefault(); _showFolderCtxMenu(e, folder.id); });
 
   return li;
@@ -282,7 +295,6 @@ function renderServerList() {
 
   const activeId = typeof activeServerId !== 'undefined' ? activeServerId : null;
 
-  // Auto-expand folder containing active server
   if (activeId) {
     _listState.forEach(item => {
       if (item.type === 'folder' && item.serverIds.includes(activeId)) item.expanded = true;
@@ -326,93 +338,151 @@ function renderServerList() {
     list.querySelector(`[data-id="${activeId}"]`)?.classList.add('active');
   }
 
-  _attachDnD(list);
+  _initDnD(list);
 }
 
-// ── Drag & Drop ───────────────────────────────────────────────────────────────
+// ── Pointer-based Drag & Drop ─────────────────────────────────────────────────
 
-function _attachDnD(list) {
+function _initDnD(list) {
   if (list.dataset.dndReady) return;
   list.dataset.dndReady = 'true';
 
-  let overEl = null;
-  let overZone = null;
-
-  list.addEventListener('dragstart', e => {
-    const item = e.target.closest('[draggable="true"]');
+  list.addEventListener('pointerdown', e => {
+    if (e.button !== 0) return;
+    const item = e.target.closest('[data-draggable="true"]');
     if (!item) return;
-    _dragId = item.dataset.id;
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', _dragId);
-    requestAnimationFrame(() => item.classList.add('dragging'));
-  });
 
-  list.addEventListener('dragend', () => {
-    list.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
-    _clearIndicators(list);
-    _dragId = null;
-    overEl = null;
-    overZone = null;
-  });
+    const startX = e.clientX;
+    const startY = e.clientY;
+    let started = false;
 
-  list.addEventListener('dragover', e => {
-    e.preventDefault();
-    if (!_dragId) return;
+    const onMove = ev => {
+      if (!started && Math.hypot(ev.clientX - startX, ev.clientY - startY) > _DRAG_THRESHOLD) {
+        started = true;
+        _didDrag = true;
+        _startDrag(item, ev.clientX, ev.clientY);
+      }
+      if (started) _updateDrag(ev.clientX, ev.clientY);
+    };
 
-    const target = e.target.closest('.server-item:not(.server-add):not(.server-discover)');
-    if (!target) return;
+    const onUp = ev => {
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
+      if (started) _endDrag(ev.clientX, ev.clientY);
+    };
 
-    const targetId = target.dataset.id;
-    if (targetId === _dragId || targetId === 'home') return;
-
-    const isDragFolder = _isTopLevelFolder(_dragId);
-    const isTargetFolder = target.dataset.isFolder === 'true';
-    const rect = target.getBoundingClientRect();
-    const pct = (e.clientY - rect.top) / rect.height;
-
-    let zone;
-    if (isDragFolder) {
-      zone = pct < 0.5 ? 'above' : 'below';
-    } else if (isTargetFolder) {
-      zone = pct < 0.3 ? 'above' : pct > 0.7 ? 'below' : 'into';
-    } else {
-      zone = pct < 0.35 ? 'above' : pct > 0.65 ? 'below' : 'create-folder';
-    }
-
-    if (target !== overEl || zone !== overZone) {
-      _clearIndicators(list);
-      overEl = target;
-      overZone = zone;
-      if (zone === 'above') target.classList.add('dnd-above');
-      else if (zone === 'below') target.classList.add('dnd-below');
-      else target.classList.add('dnd-into');
-    }
-  });
-
-  list.addEventListener('dragleave', e => {
-    if (!list.contains(e.relatedTarget)) {
-      _clearIndicators(list);
-      overEl = null;
-      overZone = null;
-    }
-  });
-
-  list.addEventListener('drop', e => {
-    e.preventDefault();
-    if (!_dragId || !overEl || !overZone) return;
-    const targetId = overEl.dataset.id;
-    const targetFolderId = overEl.dataset.folderId || null;
-    _clearIndicators(list);
-    _applyDrop(_dragId, targetId, overZone, targetFolderId);
-    overEl = null;
-    overZone = null;
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
   });
 }
 
-function _clearIndicators(list) {
-  list.querySelectorAll('.dnd-above, .dnd-below, .dnd-into').forEach(el => {
-    el.classList.remove('dnd-above', 'dnd-below', 'dnd-into');
+function _startDrag(itemEl, clientX, clientY) {
+  const iconEl = itemEl.querySelector('.server-icon');
+  const iconRect = iconEl.getBoundingClientRect();
+
+  const ghost = iconEl.cloneNode(true);
+  Object.assign(ghost.style, {
+    position: 'fixed',
+    width: iconRect.width + 'px',
+    height: iconRect.height + 'px',
+    left: (clientX - iconRect.width / 2) + 'px',
+    top: (clientY - iconRect.height / 2) + 'px',
+    pointerEvents: 'none',
+    zIndex: '10000',
+    opacity: '0.9',
+    transform: 'scale(1.1) rotate(-4deg)',
+    borderRadius: '16px',
+    transition: 'none',
+    overflow: 'hidden',
   });
+  document.body.appendChild(ghost);
+
+  const line = document.createElement('div');
+  line.className = 'dnd-insert-line';
+  line.style.display = 'none';
+  document.body.appendChild(line);
+
+  itemEl.classList.add('dragging');
+  document.body.style.cursor = 'grabbing';
+
+  _drag = { id: itemEl.dataset.id, itemEl, ghost, line, dropResult: null };
+}
+
+function _updateDrag(clientX, clientY) {
+  if (!_drag) return;
+  const { ghost, line, id } = _drag;
+
+  ghost.style.left = (clientX - 24) + 'px';
+  ghost.style.top = (clientY - 24) + 'px';
+
+  const list = document.getElementById('server-list');
+  const result = _calcDropTarget(list, id, clientX, clientY);
+  _drag.dropResult = result;
+
+  list.querySelectorAll('.dnd-into').forEach(el => el.classList.remove('dnd-into'));
+  line.style.display = 'none';
+
+  if (!result) return;
+
+  if (result.type === 'into') {
+    result.el.classList.add('dnd-into');
+  } else {
+    const wrapperRect = document.getElementById('server-list-wrapper').getBoundingClientRect();
+    line.style.display = 'block';
+    line.style.left = (wrapperRect.left + 12) + 'px';
+    line.style.top = result.y + 'px';
+    line.style.width = '48px';
+  }
+}
+
+function _endDrag() {
+  if (!_drag) return;
+  const { ghost, line, id, itemEl, dropResult } = _drag;
+
+  ghost.remove();
+  line.remove();
+  itemEl.classList.remove('dragging');
+  document.getElementById('server-list')?.querySelectorAll('.dnd-into').forEach(el => el.classList.remove('dnd-into'));
+  document.body.style.cursor = '';
+  _drag = null;
+
+  if (dropResult) _applyDropResult(id, dropResult);
+}
+
+function _calcDropTarget(list, dragId, clientX, clientY) {
+  const wrapper = document.getElementById('server-list-wrapper');
+  if (!wrapper) return null;
+  const wrapperRect = wrapper.getBoundingClientRect();
+  if (clientX < wrapperRect.left || clientX > wrapperRect.right) return null;
+
+  const all = [...list.querySelectorAll('.server-item:not(.server-add):not(.server-discover)')];
+  const targets = all.filter(el => el.dataset.id !== dragId && el.dataset.id !== 'home');
+
+  // Check if cursor is directly over an icon → into (create folder / add to folder)
+  for (const item of targets) {
+    const icon = item.querySelector('.server-icon');
+    if (!icon) continue;
+    const r = icon.getBoundingClientRect();
+    if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom) {
+      return { type: 'into', el: item };
+    }
+  }
+
+  // Find gap between items → reorder
+  for (let i = 0; i < targets.length; i++) {
+    const rect = targets[i].getBoundingClientRect();
+    if (clientY < rect.top + rect.height / 2) {
+      return { type: 'gap', before: targets[i], after: targets[i - 1] || null, y: rect.top - 3 };
+    }
+  }
+
+  const last = targets[targets.length - 1];
+  if (last) {
+    const r = last.getBoundingClientRect();
+    return { type: 'gap', before: null, after: last, y: r.bottom + 3 };
+  }
+
+  return null;
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
