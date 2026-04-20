@@ -3,6 +3,28 @@ let activeChannelId = null;
 let _activeChannelType = null;
 let _activeChannelName = null;
 
+// ─── Read state (persisté en localStorage) ───
+const _readState = JSON.parse(localStorage.getItem('discord-read-state') || '{}');
+
+function _saveReadState() {
+  localStorage.setItem('discord-read-state', JSON.stringify(_readState));
+}
+
+function _getDmMessageCount(channelId) {
+  return (MOCK_MESSAGES[channelId] || []).length;
+}
+
+function _getUnreadCount(channelId) {
+  const total = _getDmMessageCount(channelId);
+  const read = _readState[channelId] ?? 0;
+  return Math.max(0, total - read);
+}
+
+function _markAsRead(channelId) {
+  _readState[channelId] = _getDmMessageCount(channelId);
+  _saveReadState();
+}
+
 function setTitlebarTitle(title) {
   document.querySelector('.titlebar-title').textContent = title;
 }
@@ -51,6 +73,8 @@ function selectChannel(channelId, channelName, channelType) {
     chEl.classList.remove('has-unread');
     chEl.querySelector('.unread-badge')?.remove();
   }
+
+  if (channelType === 'dm') _markAsRead(channelId);
 
   const server = getServerById(activeServerId);
   if (server) {
@@ -102,8 +126,8 @@ function renderDmList(server, container) {
     item.className = 'dm-item channel-item';
     item.dataset.id = dm.id;
 
-    // Show unread dot if has messages
-    const hasMessages = (MOCK_MESSAGES[dm.id] || []).length > 0;
+    const unread = _getUnreadCount(dm.id);
+    if (unread > 0) item.classList.add('has-unread');
 
     item.innerHTML = `
       <div class="dm-avatar">
@@ -111,7 +135,7 @@ function renderDmList(server, container) {
         <span class="dm-status status-${dm.status}"></span>
       </div>
       <span class="dm-name">${dm.name}</span>
-      ${hasMessages ? '<span class="unread-badge"></span>' : ''}
+      ${unread > 0 ? `<span class="unread-badge">${unread}</span>` : ''}
       <button class="dm-close-btn" title="Fermer">✕</button>
     `;
 
