@@ -41,22 +41,17 @@
 .server-icon {
   width: 48px;
   height: 48px;
-  border-radius: 50%;
+  border-radius: 16px;
   background-color: var(--bg-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  transition: border-radius 0.15s ease-out, background-color 0.15s;
+  transition: background-color 0.15s;
   color: var(--channels-default);
   font-weight: 600;
   font-size: 18px;
   flex-shrink: 0;
-}
-
-.server-item:hover .server-icon,
-.server-item.active .server-icon {
-  border-radius: 16px;
 }
 
 .server-icon-home {
@@ -91,12 +86,11 @@
 .server-icon-discover {
   background-color: var(--bg-secondary);
   color: var(--status-online);
-  transition: border-radius 0.15s ease-out, background-color 0.15s, color 0.15s;
+  transition: background-color 0.15s, color 0.15s;
 }
 
 .server-item:hover .server-icon-add,
 .server-item:hover .server-icon-discover {
-  border-radius: 16px;
   background-color: var(--status-online);
   color: #fff;
 }
