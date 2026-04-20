@@ -2,11 +2,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   initTitlebar();
   await initUserPanel();
   initServerList();
+  initChatInput();
+  initMembersToggle();
   selectServer('home');
 });
 
 async function initUserPanel() {
   const config = await window.electronAPI.getUserConfig();
+  window._userConfig = config;
 
   const avatar = document.querySelector('#user-panel .user-avatar');
   const name = document.querySelector('#user-panel .user-name');
@@ -15,13 +18,22 @@ async function initUserPanel() {
   name.textContent = config.username;
   tag.textContent = `#${config.tag}`;
 
-  // Initiales : première lettre de chaque mot, max 2
   const initials = config.username
     .split(/\s+/)
     .map((w) => w[0]?.toUpperCase() ?? '')
     .slice(0, 2)
     .join('');
   avatar.textContent = initials || 'U';
+
+  // Update MOCK_MESSAGES 'me' author name to match config
+  Object.values(MOCK_MESSAGES).forEach((msgs) => {
+    msgs.forEach((m) => {
+      if (m.authorId === 'me') {
+        m.author = config.username;
+        m.avatar = initials || 'U';
+      }
+    });
+  });
 }
 
 function initTitlebar() {
@@ -50,6 +62,30 @@ function initTitlebar() {
   });
 }
 
+function initChatInput() {
+  const input = document.getElementById('message-input');
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      const content = input.innerText.trim();
+      if (content && activeChannelId) {
+        sendMessage(content);
+        input.innerHTML = '';
+      }
+    }
+  });
+
+  input.addEventListener('input', () => {
+    if (activeChannelId) onUserTyping(activeChannelId);
+  });
+}
+
+function initMembersToggle() {
+  const btn = document.getElementById('btn-members');
+  if (btn) btn.addEventListener('click', () => toggleMembersPanel());
+}
+
 function initServerList() {
   const list = document.getElementById('server-list');
 
@@ -72,6 +108,12 @@ function initServerList() {
         </div>
       `;
     } else {
+      // Check if any channel in this server has messages (unread indicator)
+      const hasUnread = server.categories?.some((cat) =>
+        cat.channels.some((ch) => (MOCK_MESSAGES[ch.id] || []).length > 0 && ch.type === 'text')
+      );
+      if (hasUnread) item.classList.add('has-unread');
+
       item.innerHTML += `
         <div class="server-icon" style="--server-color: ${server.color}">
           <span class="server-abbr">${server.abbr}</span>
