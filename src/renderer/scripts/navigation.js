@@ -1,6 +1,10 @@
 let activeServerId = 'home';
 let activeChannelId = null;
 
+function setTitlebarTitle(title) {
+  document.querySelector('.titlebar-title').textContent = title;
+}
+
 function selectServer(serverId) {
   activeServerId = serverId;
   activeChannelId = null;
@@ -12,6 +16,7 @@ function selectServer(serverId) {
   const server = getServerById(serverId);
   if (!server) return;
 
+  setTitlebarTitle(server.name);
   renderChannelSidebar(server);
 
   const defaultChannel = getDefaultChannel(server);
@@ -28,6 +33,12 @@ function selectChannel(channelId, channelName, channelType) {
   document.querySelectorAll('.channel-item, .dm-item').forEach((el) => {
     el.classList.toggle('active', el.dataset.id === channelId);
   });
+
+  const server = getServerById(activeServerId);
+  if (server) {
+    const prefix = channelType === 'dm' ? '' : '#';
+    setTitlebarTitle(`${server.name} — ${prefix}${channelName}`);
+  }
 
   updateChatHeader(channelId, channelName, channelType);
 }
