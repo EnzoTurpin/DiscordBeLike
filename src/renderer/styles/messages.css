@@ -130,22 +130,29 @@
   width: 56px;
   font-size: 11px;
   color: var(--text-muted);
-  opacity: 0;
   flex-shrink: 0;
   padding-top: 3px;
   text-align: right;
   padding-right: 8px;
-  transition: opacity 0.1s;
-  display: none;
+  visibility: hidden;
+  /* Always reserve the space so all message texts align */
 }
 
-/* Only show on subsequent messages in a group (not the first) */
-.message-items .message-item:not(:first-child) .message-time-left {
-  display: block;
+.message-item:hover .message-time-left {
+  visibility: visible;
+}
+
+/* First item in group already has timestamp in header — never show the left time */
+.message-items .message-item:first-child .message-time-left {
+  visibility: hidden !important;
+}
+
+.message-item-content {
+  flex: 1;
+  min-width: 0;
 }
 
 .message-text {
-  flex: 1;
   font-size: 15px;
   color: var(--text-normal);
   line-height: 1.375;

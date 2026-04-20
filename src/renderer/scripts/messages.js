@@ -98,12 +98,18 @@ function buildItemEl(msg, channelId) {
   timeEl.className = 'message-time-left';
   timeEl.textContent = formatTime(msg.timestamp);
 
+  const itemContent = document.createElement('div');
+  itemContent.className = 'message-item-content';
+
   const textEl = document.createElement('div');
   textEl.className = 'message-text';
   textEl.innerHTML = processContent(msg.content);
 
   const reactionsEl = document.createElement('div');
   reactionsEl.className = 'message-reactions';
+
+  itemContent.appendChild(textEl);
+  itemContent.appendChild(reactionsEl);
 
   const toolbar = buildToolbar();
   toolbar.querySelector('[data-action="react"]').addEventListener('click', (e) => {
@@ -113,9 +119,8 @@ function buildItemEl(msg, channelId) {
   toolbar.querySelector('[data-action="reply"]').addEventListener('click', () => setReplyTarget(msg));
 
   div.appendChild(timeEl);
-  div.appendChild(textEl);
+  div.appendChild(itemContent);
   div.appendChild(toolbar);
-  div.appendChild(reactionsEl);
   return div;
 }
 
@@ -279,7 +284,7 @@ function _addReaction(channelId, msgId, emoji) {
 }
 
 function _renderItemReactions(itemEl, channelId, msgId) {
-  const reactionsEl = itemEl.querySelector('.message-reactions');
+  const reactionsEl = itemEl.querySelector('.message-item-content .message-reactions');
   if (!reactionsEl) return;
   const reactions = MESSAGE_REACTIONS[channelId]?.[msgId] || {};
   reactionsEl.innerHTML = '';

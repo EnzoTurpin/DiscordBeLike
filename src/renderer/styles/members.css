@@ -169,18 +169,6 @@
 }
 
 /* Server pill unread indicator */
-.server-item.has-unread .server-pill::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 8px;
-  height: 8px;
-  background-color: #fff;
-  border-radius: 50%;
-}
-
 .server-item.has-unread .server-pill {
   height: 8px;
 }
