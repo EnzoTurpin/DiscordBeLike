@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   initTitlebar();
   initServerList();
+  initStatusMenu();
   selectServer('home');
 });
 
@@ -98,4 +99,49 @@ function initServerList() {
     </div>
   `;
   list.appendChild(discoverBtn);
+}
+
+function initStatusMenu() {
+  const STATUSES = [
+    { key: 'online', label: 'En ligne',          color: 'var(--status-online)' },
+    { key: 'idle',   label: 'Absent',             color: 'var(--status-idle)' },
+    { key: 'dnd',    label: 'Ne pas déranger',    color: 'var(--status-dnd)' },
+    { key: 'offline',label: 'Invisible',          color: 'var(--status-offline)' },
+  ];
+
+  let currentStatus = 'online';
+  const indicator = document.querySelector('.user-status-indicator');
+
+  const menu = document.createElement('div');
+  menu.id = 'status-menu';
+  menu.className = 'status-menu hidden';
+
+  STATUSES.forEach(({ key, label, color }) => {
+    const item = document.createElement('button');
+    item.className = 'status-menu-item';
+    item.dataset.status = key;
+    item.innerHTML = `
+      <span class="status-menu-dot" style="background-color:${color}"></span>
+      <span class="status-menu-label">${label}</span>
+      <span class="status-menu-check ${key === currentStatus ? 'visible' : ''}">✓</span>
+    `;
+    item.addEventListener('click', () => {
+      currentStatus = key;
+      indicator.style.backgroundColor = color;
+      menu.querySelectorAll('.status-menu-check').forEach(c => c.classList.remove('visible'));
+      item.querySelector('.status-menu-check').classList.add('visible');
+      menu.classList.add('hidden');
+    });
+    menu.appendChild(item);
+  });
+
+  document.getElementById('user-panel').appendChild(menu);
+
+  indicator.style.cursor = 'pointer';
+  indicator.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menu.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', () => menu.classList.add('hidden'));
 }
