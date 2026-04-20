@@ -430,3 +430,314 @@
 .user-control-btn.active {
   color: var(--text-normal);
 }
+
+/* ─── Status menu ─── */
+.status-menu {
+  position: absolute;
+  bottom: 60px;
+  left: 8px;
+  background-color: var(--bg-floating);
+  border-radius: 8px;
+  padding: 6px;
+  min-width: 180px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+  z-index: 100;
+}
+
+.status-menu.hidden {
+  display: none;
+}
+
+.status-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 4px;
+  text-align: left;
+  font-size: 14px;
+  color: var(--text-normal);
+  cursor: pointer;
+}
+
+.status-menu-item:hover {
+  background-color: var(--bg-modifier-hover);
+}
+
+.status-menu-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-menu-label {
+  flex: 1;
+}
+
+.status-menu-check {
+  visibility: hidden;
+  color: var(--brand);
+  font-weight: 700;
+}
+
+.status-menu-check.visible {
+  visibility: visible;
+}
+
+.status-menu-separator {
+  height: 1px;
+  background-color: var(--separator);
+  margin: 6px 4px;
+}
+
+.status-menu-action {
+  color: var(--text-muted);
+  gap: 10px;
+}
+
+.status-menu-action:hover {
+  color: var(--interactive-hover);
+}
+
+/* ─── Modal ─── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-box {
+  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  width: 380px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background-color: var(--bg-tertiary);
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--header-primary);
+}
+
+.modal-close {
+  color: var(--text-muted);
+  font-size: 16px;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.modal-close:hover {
+  color: var(--interactive-hover);
+}
+
+.modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--header-secondary);
+}
+
+.modal-input {
+  background-color: var(--bg-input);
+  border: none;
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-size: 15px;
+  color: var(--text-normal);
+  outline: none;
+  width: 100%;
+  font-family: inherit;
+}
+
+.modal-input:focus {
+  outline: 2px solid var(--brand);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 20px;
+  background-color: var(--bg-tertiary);
+}
+
+.modal-btn {
+  padding: 9px 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.modal-btn-cancel {
+  color: var(--text-normal);
+}
+
+.modal-btn-cancel:hover {
+  text-decoration: underline;
+}
+
+.modal-btn-confirm {
+  background-color: var(--brand);
+  color: #fff;
+}
+
+.modal-btn-confirm:hover {
+  background-color: var(--brand-hover);
+}
+
+.modal-btn-brand {
+  background-color: var(--brand);
+  color: #fff;
+  width: 100%;
+  text-align: center;
+  padding: 9px 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.modal-btn-brand:hover {
+  background-color: var(--brand-hover);
+}
+
+.modal-btn-danger {
+  color: var(--status-dnd);
+  padding: 9px 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  width: 100%;
+  text-align: center;
+}
+
+.modal-btn-danger:hover {
+  background-color: rgba(237, 66, 69, 0.1);
+}
+
+.modal-footer-col {
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ─── Account list ─── */
+.account-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+}
+
+.account-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 6px;
+  background-color: var(--bg-modifier-hover);
+}
+
+.account-row-active {
+  background-color: var(--bg-modifier-selected);
+}
+
+.account-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.account-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.account-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--header-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.account-current-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--status-online);
+  background-color: rgba(35, 165, 89, 0.15);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.account-switch-btn {
+  font-size: 12px;
+  padding: 5px 12px;
+}
+
+/* ─── Color picker ─── */
+.color-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.color-swatch:hover {
+  transform: scale(1.15);
+}
+
+.color-swatch.selected {
+  border-color: #fff;
+  transform: scale(1.15);
+}
+
+/* ─── Custom status ─── */
+.user-custom-status {
+  font-size: 11px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.2;
+}

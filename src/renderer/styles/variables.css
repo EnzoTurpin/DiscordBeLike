@@ -47,6 +47,31 @@
   --chat-header-height: 48px;
 }
 
+body.light-theme {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f2f3f5;
+  --bg-tertiary: #e3e5e8;
+  --bg-secondary-alt: #ebedef;
+  --bg-input: #e9eaec;
+  --bg-modifier-hover: rgba(6, 6, 7, 0.08);
+  --bg-modifier-active: rgba(6, 6, 7, 0.16);
+  --bg-modifier-selected: rgba(6, 6, 7, 0.20);
+  --bg-floating: #ffffff;
+
+  --text-normal: #2e3338;
+  --text-muted: #5c6068;
+  --header-primary: #060607;
+  --header-secondary: #4f5660;
+  --channels-default: #5c6068;
+
+  --interactive-normal: #4f5660;
+  --interactive-hover: #2e3338;
+  --interactive-active: #060607;
+  --interactive-muted: #c7ccd1;
+
+  --separator: #dde0e4;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;

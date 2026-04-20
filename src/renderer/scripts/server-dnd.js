@@ -360,6 +360,7 @@ function renderServerList() {
   addBtn.className = 'server-item server-add';
   addBtn.title = 'Ajouter un serveur';
   addBtn.innerHTML = `<div class="server-icon server-icon-add"><svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></div>`;
+  addBtn.addEventListener('click', () => openCreateServerModal());
   list.appendChild(addBtn);
 
   const discoverBtn = document.createElement('li');
