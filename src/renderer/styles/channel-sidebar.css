@@ -247,11 +247,6 @@
   line-height: 1.2;
 }
 
-.user-tag {
-  font-size: 11px;
-  color: var(--text-muted);
-  line-height: 1.2;
-}
 
 .user-controls {
   display: flex;
@@ -538,10 +533,6 @@
   text-overflow: ellipsis;
 }
 
-.account-tag {
-  font-size: 12px;
-  color: var(--text-muted);
-}
 
 .account-current-badge {
   font-size: 11px;

@@ -104,7 +104,7 @@ function initServerList() {
 
 // ─── Accounts ───
 let ACCOUNTS = [
-  { id: 1, name: 'Utilisateur', tag: '#0001', customStatus: '' }
+  { id: 1, name: 'Utilisateur', customStatus: '' }
 ];
 let currentAccountId = 1;
 let nextAccountId = 2;
@@ -118,11 +118,9 @@ function updateUserPanel() {
   document.querySelector('.user-name').textContent = account.name;
   document.querySelector('.user-avatar').textContent = account.name.charAt(0).toUpperCase();
 
-  const tagEl = document.querySelector('.user-tag');
   let customStatusEl = document.querySelector('.user-custom-status');
 
   if (account.customStatus) {
-    tagEl.style.display = 'none';
     if (!customStatusEl) {
       customStatusEl = document.createElement('div');
       customStatusEl.className = 'user-custom-status';
@@ -130,8 +128,6 @@ function updateUserPanel() {
     }
     customStatusEl.textContent = account.customStatus;
   } else {
-    tagEl.style.display = '';
-    tagEl.textContent = account.tag;
     if (customStatusEl) customStatusEl.remove();
   }
 }
@@ -293,7 +289,6 @@ function renderAccountSwitcher(overlay, close) {
             <div class="account-avatar">${a.name.charAt(0).toUpperCase()}</div>
             <div class="account-info">
               <div class="account-name">${a.name}</div>
-              <div class="account-tag">${a.tag}</div>
             </div>
             ${a.id === currentAccountId
               ? '<span class="account-current-badge">Actif</span>'
@@ -346,8 +341,6 @@ function renderAddAccountForm(overlay, close, mandatory = false) {
       <div class="modal-body">
         <label class="modal-label">Nom d'utilisateur</label>
         <input class="modal-input" id="new-username" type="text" placeholder="ex: bmaria" maxlength="32" />
-        <label class="modal-label">Tag</label>
-        <input class="modal-input" id="new-tag" type="text" placeholder="ex: #1234" maxlength="5" />
       </div>
       <div class="modal-footer">
         ${!mandatory ? '<button class="modal-btn modal-btn-cancel" id="back-btn">Retour</button>' : ''}
@@ -363,10 +356,9 @@ function renderAddAccountForm(overlay, close, mandatory = false) {
 
   overlay.querySelector('#add-confirm-btn').addEventListener('click', () => {
     const name = overlay.querySelector('#new-username').value.trim();
-    const tag  = overlay.querySelector('#new-tag').value.trim() || '#0001';
     if (!name) return;
 
-    const newAccount = { id: nextAccountId++, name, tag, customStatus: '' };
+    const newAccount = { id: nextAccountId++, name, customStatus: '' };
     ACCOUNTS.push(newAccount);
     currentAccountId = newAccount.id;
     updateUserPanel();
