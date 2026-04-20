@@ -1,7 +1,7 @@
 // ─── Client Socket.io ───
 // Gère la connexion temps réel avec le serveur.
 
-const SOCKET_URL = 'http://localhost:3001';
+const SOCKET_URL = 'http://10.36.1.31:3001';
 
 let _socket = null;
 let _myUserId = null;
