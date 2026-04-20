@@ -182,15 +182,15 @@
 }
 
 .message-time-left {
+  position: absolute;
+  left: -56px;
+  top: 3px;
   width: 56px;
   font-size: 11px;
   color: var(--text-muted);
-  flex-shrink: 0;
-  padding-top: 3px;
   text-align: right;
   padding-right: 8px;
   visibility: hidden;
-  /* Always reserve the space so all message texts align */
 }
 
 .message-item:hover .message-time-left {
