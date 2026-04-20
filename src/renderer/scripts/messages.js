@@ -160,6 +160,20 @@ function buildGroupEl(msg) {
   return div;
 }
 
+function buildDateSeparator(date) {
+  const div = document.createElement('div');
+  div.className = 'date-separator';
+  const now = new Date();
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  let label;
+  if (date.toDateString() === now.toDateString()) label = "Aujourd'hui";
+  else if (date.toDateString() === yesterday.toDateString()) label = 'Hier';
+  else label = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  div.innerHTML = `<span class="date-separator-line"></span><span class="date-separator-text">${label}</span><span class="date-separator-line"></span>`;
+  return div;
+}
+
 function buildChannelWelcome(channelId, channelName, channelType) {
   const div = document.createElement('div');
   div.className = 'channel-welcome';
@@ -186,6 +200,32 @@ function buildChannelWelcome(channelId, channelName, channelType) {
 
 // ─── Render ───
 
+// ─── Jump to bottom ───
+
+function initJumpToBottom() {
+  const container = document.getElementById('messages-container');
+  if (!container) return;
+
+  let btn = document.getElementById('jump-to-bottom');
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.id = 'jump-to-bottom';
+    btn.className = 'jump-to-bottom';
+    btn.title = 'Aller en bas';
+    btn.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M7 10l5 5 5-5H7z"/></svg>`;
+    btn.addEventListener('click', () => {
+      container.scrollTop = container.scrollHeight;
+    });
+    container.parentNode.insertBefore(btn, container.nextSibling);
+  }
+
+  container.addEventListener('scroll', () => {
+    const threshold = 150;
+    const atBottom = container.scrollHeight - container.scrollTop - container.clientHeight < threshold;
+    btn.classList.toggle('visible', !atBottom);
+  });
+}
+
 function renderMessages(channelId, channelName, channelType) {
   _currentChannelId = channelId;
 
@@ -207,8 +247,15 @@ function renderMessages(channelId, channelName, channelType) {
   const fragment = document.createDocumentFragment();
   let prevMsg = null;
   let currentGroupEl = null;
+  let lastDate = null;
 
   messages.forEach(msg => {
+    const msgDate = msg.timestamp.toDateString();
+    if (msgDate !== lastDate) {
+      fragment.appendChild(buildDateSeparator(msg.timestamp));
+      lastDate = msgDate;
+      prevMsg = null; // force new group after date separator
+    }
     if (!shouldGroup(prevMsg, msg)) {
       currentGroupEl = buildGroupEl(msg);
       fragment.appendChild(currentGroupEl);
@@ -220,6 +267,7 @@ function renderMessages(channelId, channelName, channelType) {
   container.appendChild(fragment);
   _renderAllReactions(channelId, container);
 
+  initJumpToBottom();
   requestAnimationFrame(() => { container.scrollTop = container.scrollHeight; });
 }
 

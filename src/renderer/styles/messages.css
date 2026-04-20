@@ -36,6 +36,62 @@
   line-height: 1.5;
 }
 
+/* ─── Date separator ─── */
+.date-separator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 16px 8px;
+  user-select: none;
+}
+
+.date-separator-line {
+  flex: 1;
+  height: 1px;
+  background-color: var(--separator);
+}
+
+.date-separator-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  padding: 0 4px;
+}
+
+/* ─── Jump to bottom ─── */
+.jump-to-bottom {
+  position: absolute;
+  bottom: 80px;
+  right: 24px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--bg-floating);
+  border: 1px solid var(--separator);
+  color: var(--interactive-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity 0.15s, transform 0.15s;
+  z-index: 5;
+}
+
+.jump-to-bottom.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.jump-to-bottom:hover {
+  background-color: var(--bg-modifier-hover);
+  color: var(--interactive-hover);
+}
+
 /* ─── Message group ─── */
 .message-group {
   display: flex;
