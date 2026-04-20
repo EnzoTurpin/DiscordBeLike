@@ -183,14 +183,10 @@ function renderCategoryList(server, container) {
       chEl.dataset.id = ch.id;
       chEl.dataset.type = ch.type;
 
-      const hasUnread = (MOCK_MESSAGES[ch.id] || []).length > 0 && ch.type === 'text';
-      if (hasUnread) chEl.classList.add('has-unread');
-
       const icon = ch.type === 'voice' ? ICONS.voice : ICONS.text;
       chEl.innerHTML = `
         <span class="channel-icon">${icon}</span>
         <span class="channel-name-text">${ch.name}</span>
-        ${hasUnread ? '<span class="unread-badge"></span>' : ''}
         <div class="channel-actions">
           <button class="channel-action-btn" title="Inviter">
             <svg viewBox="0 0 24 24" width="16" height="16">
