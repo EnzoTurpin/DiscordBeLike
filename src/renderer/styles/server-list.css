@@ -106,3 +106,92 @@
 }
 
 /* Tooltip via title attribute — handled natively */
+
+/* ─── Drag & Drop ─── */
+.server-item.dragging {
+  opacity: 0.3;
+}
+
+.server-item.dnd-above {
+  box-shadow: 0 -2px 0 0 var(--brand);
+}
+
+.server-item.dnd-below {
+  box-shadow: 0 2px 0 0 var(--brand);
+}
+
+.server-item.dnd-into .server-icon {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* ─── Folder icon ─── */
+.server-folder-icon {
+  background: var(--bg-secondary-alt) !important;
+  padding: 7px;
+}
+
+.server-folder-item.is-expanded .server-folder-icon {
+  background: var(--bg-primary) !important;
+}
+
+.folder-mini-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  width: 100%;
+  height: 100%;
+}
+
+.folder-mini-icon {
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1;
+}
+
+/* ─── Folder children ─── */
+.server-item--child::before {
+  content: '';
+  position: absolute;
+  left: -3px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--folder-color, var(--brand));
+  border-radius: 1px;
+  opacity: 0.6;
+}
+
+/* ─── Folder context menu ─── */
+.folder-ctx-menu {
+  position: fixed;
+  background: var(--bg-floating);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  padding: 6px 0;
+  min-width: 160px;
+  z-index: 9999;
+}
+
+.folder-ctx-item {
+  padding: 6px 12px;
+  font-size: 14px;
+  color: var(--interactive-normal);
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.folder-ctx-item:hover {
+  background: var(--brand);
+  color: white;
+}
+
+.folder-ctx-danger:hover {
+  background: var(--mention-badge);
+}
