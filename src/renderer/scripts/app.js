@@ -102,12 +102,46 @@ function initServerList() {
   list.appendChild(discoverBtn);
 }
 
+// ─── Accounts ───
+let ACCOUNTS = [
+  { id: 1, name: 'Utilisateur', tag: '#0001', customStatus: '' }
+];
+let currentAccountId = 1;
+let nextAccountId = 2;
+
+function getCurrentAccount() {
+  return ACCOUNTS.find(a => a.id === currentAccountId);
+}
+
+function updateUserPanel() {
+  const account = getCurrentAccount();
+  document.querySelector('.user-name').textContent = account.name;
+  document.querySelector('.user-avatar').textContent = account.name.charAt(0).toUpperCase();
+
+  const tagEl = document.querySelector('.user-tag');
+  let customStatusEl = document.querySelector('.user-custom-status');
+
+  if (account.customStatus) {
+    tagEl.style.display = 'none';
+    if (!customStatusEl) {
+      customStatusEl = document.createElement('div');
+      customStatusEl.className = 'user-custom-status';
+      document.querySelector('.user-info').appendChild(customStatusEl);
+    }
+    customStatusEl.textContent = account.customStatus;
+  } else {
+    tagEl.style.display = '';
+    tagEl.textContent = account.tag;
+    if (customStatusEl) customStatusEl.remove();
+  }
+}
+
 function initStatusMenu() {
   const STATUSES = [
-    { key: 'online', label: 'En ligne',          color: 'var(--status-online)' },
-    { key: 'idle',   label: 'Absent',             color: 'var(--status-idle)' },
-    { key: 'dnd',    label: 'Ne pas déranger',    color: 'var(--status-dnd)' },
-    { key: 'offline',label: 'Invisible',          color: 'var(--status-offline)' },
+    { key: 'online',  label: 'En ligne',         color: 'var(--status-online)' },
+    { key: 'idle',    label: 'Absent',            color: 'var(--status-idle)' },
+    { key: 'dnd',     label: 'Ne pas déranger',   color: 'var(--status-dnd)' },
+    { key: 'offline', label: 'Invisible',         color: 'var(--status-offline)' },
   ];
 
   let currentStatus = 'online';
@@ -136,12 +170,32 @@ function initStatusMenu() {
     menu.appendChild(item);
   });
 
-  const separator = document.createElement('div');
-  separator.className = 'status-menu-separator';
-  menu.appendChild(separator);
+  // Séparateur + Humeur du jour
+  const sep1 = document.createElement('div');
+  sep1.className = 'status-menu-separator';
+  menu.appendChild(sep1);
+
+  const moodBtn = document.createElement('button');
+  moodBtn.className = 'status-menu-item status-menu-action';
+  moodBtn.innerHTML = `
+    <svg viewBox="0 0 24 24" width="14" height="14" style="flex-shrink:0">
+      <path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm17.71-10.21a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+    </svg>
+    <span class="status-menu-label">Humeur du jour</span>
+  `;
+  moodBtn.addEventListener('click', () => {
+    menu.classList.add('hidden');
+    openMoodModal();
+  });
+  menu.appendChild(moodBtn);
+
+  // Séparateur + Changer de compte
+  const sep2 = document.createElement('div');
+  sep2.className = 'status-menu-separator';
+  menu.appendChild(sep2);
 
   const switchBtn = document.createElement('button');
-  switchBtn.className = 'status-menu-item status-menu-switch';
+  switchBtn.className = 'status-menu-item status-menu-action';
   switchBtn.innerHTML = `
     <svg viewBox="0 0 24 24" width="14" height="14" style="flex-shrink:0">
       <path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
@@ -150,7 +204,7 @@ function initStatusMenu() {
   `;
   switchBtn.addEventListener('click', () => {
     menu.classList.add('hidden');
-    openSwitchAccountModal();
+    openAccountSwitcherModal();
   });
   menu.appendChild(switchBtn);
 
@@ -166,49 +220,160 @@ function initStatusMenu() {
   document.addEventListener('click', () => menu.classList.add('hidden'));
 }
 
-function openSwitchAccountModal() {
+function openMoodModal() {
+  const account = getCurrentAccount();
   const overlay = document.createElement('div');
   overlay.className = 'modal-overlay';
-
   overlay.innerHTML = `
-    <div class="modal-box" id="switch-account-modal">
+    <div class="modal-box">
       <div class="modal-header">
-        <span class="modal-title">Changer de compte</span>
-        <button class="modal-close" id="modal-close-btn">✕</button>
+        <span class="modal-title">Humeur du jour</span>
+        <button class="modal-close">✕</button>
       </div>
       <div class="modal-body">
-        <label class="modal-label">Nom d'utilisateur</label>
-        <input class="modal-input" id="modal-username" type="text" placeholder="Nouveau nom…" maxlength="32" />
-        <label class="modal-label">Tag</label>
-        <input class="modal-input" id="modal-tag" type="text" placeholder="ex: #1234" maxlength="5" />
+        <label class="modal-label">Décris ton humeur</label>
+        <input class="modal-input" id="mood-input" type="text"
+          placeholder="ex: 😴 Fatigué, 🎮 En mode gaming…"
+          maxlength="64"
+          value="${account.customStatus}" />
       </div>
       <div class="modal-footer">
-        <button class="modal-btn modal-btn-cancel" id="modal-cancel-btn">Annuler</button>
-        <button class="modal-btn modal-btn-confirm" id="modal-confirm-btn">Confirmer</button>
+        <button class="modal-btn modal-btn-cancel">Annuler</button>
+        <button class="modal-btn modal-btn-danger" id="mood-clear-btn">Effacer</button>
+        <button class="modal-btn modal-btn-confirm">Enregistrer</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const close = () => overlay.remove();
+  overlay.querySelector('.modal-close').addEventListener('click', close);
+  overlay.querySelector('.modal-btn-cancel').addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+
+  overlay.querySelector('#mood-clear-btn').addEventListener('click', () => {
+    getCurrentAccount().customStatus = '';
+    updateUserPanel();
+    close();
+  });
+
+  overlay.querySelector('.modal-btn-confirm').addEventListener('click', () => {
+    const val = overlay.querySelector('#mood-input').value.trim();
+    getCurrentAccount().customStatus = val;
+    updateUserPanel();
+    close();
+  });
+
+  overlay.querySelector('#mood-input').focus();
+}
+
+function openAccountSwitcherModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  document.body.appendChild(overlay);
+
+  const close = () => overlay.remove();
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+
+  renderAccountSwitcher(overlay, close);
+}
+
+function renderAccountSwitcher(overlay, close) {
+  const current = getCurrentAccount();
+
+  overlay.innerHTML = `
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">Comptes</span>
+        <button class="modal-close">✕</button>
+      </div>
+      <div class="modal-body account-list">
+        ${ACCOUNTS.map(a => `
+          <div class="account-row ${a.id === currentAccountId ? 'account-row-active' : ''}" data-id="${a.id}">
+            <div class="account-avatar">${a.name.charAt(0).toUpperCase()}</div>
+            <div class="account-info">
+              <div class="account-name">${a.name}</div>
+              <div class="account-tag">${a.tag}</div>
+            </div>
+            ${a.id === currentAccountId
+              ? '<span class="account-current-badge">Actif</span>'
+              : '<button class="modal-btn modal-btn-confirm account-switch-btn">Rejoindre</button>'
+            }
+          </div>
+        `).join('')}
+      </div>
+      <div class="modal-footer modal-footer-col">
+        <button class="modal-btn modal-btn-brand" id="add-account-btn">+ Ajouter un compte</button>
+        <button class="modal-btn modal-btn-danger" id="disconnect-btn">Se déconnecter</button>
       </div>
     </div>
   `;
 
-  document.body.appendChild(overlay);
+  overlay.querySelector('.modal-close').addEventListener('click', close);
 
-  const close = () => overlay.remove();
+  overlay.querySelectorAll('.account-switch-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = parseInt(btn.closest('.account-row').dataset.id);
+      currentAccountId = id;
+      updateUserPanel();
+      close();
+    });
+  });
 
-  overlay.querySelector('#modal-close-btn').addEventListener('click', close);
-  overlay.querySelector('#modal-cancel-btn').addEventListener('click', close);
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  overlay.querySelector('#add-account-btn').addEventListener('click', () => {
+    renderAddAccountForm(overlay, close);
+  });
 
-  overlay.querySelector('#modal-confirm-btn').addEventListener('click', () => {
-    const name = overlay.querySelector('#modal-username').value.trim();
-    const tag  = overlay.querySelector('#modal-tag').value.trim();
+  overlay.querySelector('#disconnect-btn').addEventListener('click', () => {
+    ACCOUNTS = ACCOUNTS.filter(a => a.id !== currentAccountId);
+    if (ACCOUNTS.length === 0) {
+      renderAddAccountForm(overlay, close, true);
+    } else {
+      currentAccountId = ACCOUNTS[0].id;
+      updateUserPanel();
+      renderAccountSwitcher(overlay, close);
+    }
+  });
+}
+
+function renderAddAccountForm(overlay, close, mandatory = false) {
+  overlay.innerHTML = `
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">Ajouter un compte</span>
+        ${!mandatory ? '<button class="modal-close">✕</button>' : ''}
+      </div>
+      <div class="modal-body">
+        <label class="modal-label">Nom d'utilisateur</label>
+        <input class="modal-input" id="new-username" type="text" placeholder="ex: bmaria" maxlength="32" />
+        <label class="modal-label">Tag</label>
+        <input class="modal-input" id="new-tag" type="text" placeholder="ex: #1234" maxlength="5" />
+      </div>
+      <div class="modal-footer">
+        ${!mandatory ? '<button class="modal-btn modal-btn-cancel" id="back-btn">Retour</button>' : ''}
+        <button class="modal-btn modal-btn-confirm" id="add-confirm-btn">Ajouter</button>
+      </div>
+    </div>
+  `;
+
+  if (!mandatory) {
+    overlay.querySelector('.modal-close').addEventListener('click', close);
+    overlay.querySelector('#back-btn').addEventListener('click', () => renderAccountSwitcher(overlay, close));
+  }
+
+  overlay.querySelector('#add-confirm-btn').addEventListener('click', () => {
+    const name = overlay.querySelector('#new-username').value.trim();
+    const tag  = overlay.querySelector('#new-tag').value.trim() || '#0001';
     if (!name) return;
 
-    document.querySelector('.user-name').textContent = name;
-    document.querySelector('.user-tag').textContent = tag || '#0001';
-    document.querySelector('.user-avatar').textContent = name.charAt(0).toUpperCase();
+    const newAccount = { id: nextAccountId++, name, tag, customStatus: '' };
+    ACCOUNTS.push(newAccount);
+    currentAccountId = newAccount.id;
+    updateUserPanel();
     close();
   });
 
-  overlay.querySelector('#modal-username').focus();
+  overlay.querySelector('#new-username').focus();
 }
 
 function initThemeToggle() {
