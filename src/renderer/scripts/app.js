@@ -201,6 +201,7 @@ function initServerList() {
       </svg>
     </div>
   `;
+  addBtn.addEventListener('click', () => openCreateServerModal());
   list.appendChild(addBtn);
 
   const discoverBtn = document.createElement('li');
@@ -480,6 +481,105 @@ function renderAddAccountForm(overlay, close, mandatory = false) {
   });
 
   overlay.querySelector('#new-username').focus();
+}
+
+function openCreateServerModal() {
+  const COLORS = ['#5865F2','#57F287','#FEE75C','#EB459E','#ED4245','#3BA55D','#FAA61A','#00A8FC'];
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">Créer un serveur</span>
+        <button class="modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <label class="modal-label">Nom du serveur</label>
+        <input class="modal-input" id="server-name-input" type="text" placeholder="ex: Mon Serveur" maxlength="32" />
+        <label class="modal-label" style="margin-top:12px">Couleur</label>
+        <div class="color-picker">
+          ${COLORS.map((c, i) => `
+            <button class="color-swatch ${i === 0 ? 'selected' : ''}" data-color="${c}" style="background-color:${c}"></button>
+          `).join('')}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-cancel">Annuler</button>
+        <button class="modal-btn modal-btn-confirm">Créer</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  let selectedColor = COLORS[0];
+
+  overlay.querySelectorAll('.color-swatch').forEach(btn => {
+    btn.addEventListener('click', () => {
+      overlay.querySelectorAll('.color-swatch').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedColor = btn.dataset.color;
+    });
+  });
+
+  const close = () => overlay.remove();
+  overlay.querySelector('.modal-close').addEventListener('click', close);
+  overlay.querySelector('.modal-btn-cancel').addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+
+  overlay.querySelector('.modal-btn-confirm').addEventListener('click', () => {
+    const name = overlay.querySelector('#server-name-input').value.trim();
+    if (!name) return;
+
+    const abbr = name.split(/\s+/).map(w => w[0]?.toUpperCase() ?? '').slice(0, 2).join('') || name[0].toUpperCase();
+    const uid = Date.now();
+    const newServer = {
+      id: `server-${uid}`,
+      name,
+      abbr,
+      color: selectedColor,
+      categories: [
+        {
+          id: `cat-${uid}`,
+          name: 'GÉNÉRAL',
+          channels: [
+            { id: `ch-text-${uid}`, name: 'général', type: 'text' },
+            { id: `ch-voice-${uid}`, name: 'Vocal', type: 'voice' },
+          ],
+        },
+      ],
+    };
+
+    SERVERS.push(newServer);
+    addServerToList(newServer);
+    close();
+    selectServer(newServer.id);
+  });
+
+  overlay.querySelector('#server-name-input').focus();
+}
+
+function addServerToList(server) {
+  const list = document.getElementById('server-list');
+  const addBtn = list.querySelector('.server-add');
+
+  const item = document.createElement('li');
+  item.className = 'server-item';
+  item.dataset.id = server.id;
+  item.title = server.name;
+
+  const pill = document.createElement('div');
+  pill.className = 'server-pill';
+  item.appendChild(pill);
+
+  item.innerHTML += `
+    <div class="server-icon" style="--server-color: ${server.color}">
+      <span class="server-abbr">${server.abbr}</span>
+    </div>
+  `;
+
+  item.addEventListener('click', () => selectServer(server.id));
+  list.insertBefore(item, addBtn);
 }
 
 function initThemeToggle() {
