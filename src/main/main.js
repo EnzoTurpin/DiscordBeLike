@@ -94,7 +94,7 @@ function createTray() {
   });
 }
 
-function buildContextMenu(context) {
+function buildContextMenu(context, win) {
   const menus = {
     server: [
       { label: 'Marquer comme lu', click: () => {} },
@@ -103,7 +103,7 @@ function buildContextMenu(context) {
       { label: 'Paramètres du serveur', click: () => {} },
       { type: 'separator' },
       { label: 'Supprimer le serveur', click: () => {
-        BrowserWindow.fromWebContents(event.sender)?.webContents.send('delete-server', context.id);
+        win?.webContents.send('delete-server', context.id);
       }},
     ],
     channel: [
@@ -139,8 +139,9 @@ ipcMain.on('window-close', () => mainWindow?.hide());
 
 // IPC — menu contextuel
 ipcMain.on('show-context-menu', (event, context) => {
-  const menu = buildContextMenu(context);
-  menu.popup({ window: BrowserWindow.fromWebContents(event.sender) });
+  const win = BrowserWindow.fromWebContents(event.sender);
+  const menu = buildContextMenu(context, win);
+  menu.popup({ window: win });
 });
 
 // IPC — config utilisateur
