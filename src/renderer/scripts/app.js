@@ -161,9 +161,8 @@ function initServerList() {
         </div>
       `;
     } else {
-      // Check if any channel in this server has messages (unread indicator)
       const hasUnread = server.categories?.some((cat) =>
-        cat.channels.some((ch) => (MOCK_MESSAGES[ch.id] || []).length > 0 && ch.type === 'text')
+        cat.channels.some((ch) => ch.type === 'text' && _getUnreadCount(ch.id) > 0)
       );
       if (hasUnread) item.classList.add('has-unread');
 
