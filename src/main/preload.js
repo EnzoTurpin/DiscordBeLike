@@ -8,4 +8,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onMaximizeChange: (callback) => {
     ipcRenderer.on('window-maximize-change', (_event, isMaximized) => callback(isMaximized));
   },
+  getUserConfig: () => ipcRenderer.invoke('get-user-config'),
 });

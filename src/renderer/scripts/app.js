@@ -1,8 +1,28 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initTitlebar();
+  await initUserPanel();
   initServerList();
   selectServer('home');
 });
+
+async function initUserPanel() {
+  const config = await window.electronAPI.getUserConfig();
+
+  const avatar = document.querySelector('#user-panel .user-avatar');
+  const name = document.querySelector('#user-panel .user-name');
+  const tag = document.querySelector('#user-panel .user-tag');
+
+  name.textContent = config.username;
+  tag.textContent = `#${config.tag}`;
+
+  // Initiales : première lettre de chaque mot, max 2
+  const initials = config.username
+    .split(/\s+/)
+    .map((w) => w[0]?.toUpperCase() ?? '')
+    .slice(0, 2)
+    .join('');
+  avatar.textContent = initials || 'U';
+}
 
 function initTitlebar() {
   document.getElementById('btn-minimize').addEventListener('click', () => {

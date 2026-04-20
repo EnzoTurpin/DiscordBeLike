@@ -1,9 +1,32 @@
 const { app, BrowserWindow, ipcMain, Menu, Tray, nativeImage, shell } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const { createTrayIconBuffer } = require('./iconGenerator');
 
 let mainWindow = null;
 let tray = null;
+
+function loadEnv() {
+  const envPath = path.join(__dirname, '../../.env');
+  try {
+    const content = fs.readFileSync(envPath, 'utf-8');
+    const env = {};
+    for (const line of content.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const idx = trimmed.indexOf('=');
+      if (idx === -1) continue;
+      const key = trimmed.slice(0, idx).trim();
+      const value = trimmed.slice(idx + 1).trim().replace(/^["']|["']$/g, '');
+      env[key] = value;
+    }
+    return env;
+  } catch {
+    return {};
+  }
+}
+
+const env = loadEnv();
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -117,6 +140,12 @@ ipcMain.on('show-context-menu', (event, context) => {
   const menu = buildContextMenu(context);
   menu.popup({ window: BrowserWindow.fromWebContents(event.sender) });
 });
+
+// IPC — config utilisateur
+ipcMain.handle('get-user-config', () => ({
+  username: env.DISCORD_USERNAME || 'Utilisateur',
+  tag: env.DISCORD_TAG || '0000',
+}));
 
 app.whenReady().then(() => {
   createWindow();
