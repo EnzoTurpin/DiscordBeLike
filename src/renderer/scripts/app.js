@@ -6,6 +6,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   initMembersToggle();
   initSearchBar();
   selectServer('home');
+
+  // Connexion temps réel
+  if (window._userConfig) {
+    initSocket(window._userConfig.username);
+  }
 });
 
 async function initUserPanel() {
@@ -14,10 +19,7 @@ async function initUserPanel() {
 
   const avatar = document.querySelector('#user-panel .user-avatar');
   const name = document.querySelector('#user-panel .user-name');
-  const tag = document.querySelector('#user-panel .user-tag');
-
   name.textContent = config.username;
-  tag.textContent = `#${config.tag}`;
 
   const initials = config.username
     .split(/\s+/)
@@ -78,7 +80,12 @@ function initChatInput() {
   });
 
   input.addEventListener('input', () => {
-    if (activeChannelId) onUserTyping(activeChannelId);
+    if (!activeChannelId) return;
+    if (window._socketClient?.isRealDmChannel(activeChannelId)) {
+      window._socketClient.notifyTyping();
+    } else {
+      onUserTyping(activeChannelId);
+    }
   });
 }
 

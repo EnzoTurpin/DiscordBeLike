@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';" />
+    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' http://localhost:3001 ws://localhost:3001;" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Discord</title>
   <link rel="stylesheet" href="styles/variables.css" />
@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="styles/chat.css" />
   <link rel="stylesheet" href="styles/messages.css" />
   <link rel="stylesheet" href="styles/members.css" />
+  <link rel="stylesheet" href="styles/friends.css" />
 </head>
 <body>
   <div id="app">
@@ -76,7 +77,6 @@
           </div>
           <div class="user-info">
             <div class="user-name">Utilisateur</div>
-            <div class="user-tag">#0001</div>
           </div>
           <div class="user-controls">
             <button class="user-control-btn active" title="Couper le micro">
@@ -181,11 +181,14 @@
     </div><!-- /#main-layout -->
   </div><!-- /#app -->
 
+  <script src="../../node_modules/socket.io-client/dist/socket.io.js"></script>
   <script src="scripts/data.js"></script>
   <script src="scripts/messages.js"></script>
   <script src="scripts/members.js"></script>
   <script src="scripts/navigation.js"></script>
   <script src="scripts/server-dnd.js"></script>
+  <script src="scripts/socket.js"></script>
+  <script src="scripts/friends.js"></script>
   <script src="scripts/app.js"></script>
 </body>
 </html>

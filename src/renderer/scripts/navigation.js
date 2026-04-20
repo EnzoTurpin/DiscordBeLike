@@ -125,12 +125,15 @@ function renderChannelSidebar(server) {
 }
 
 function renderDmList(server, container) {
+  // Section amis réels (socket)
+  renderRealFriendsSection(container);
+
   const section = document.createElement('div');
   section.className = 'dm-section';
 
   const label = document.createElement('div');
   label.className = 'dm-section-label';
-  label.textContent = 'MESSAGES PRIVÉS';
+  label.textContent = 'MESSAGES PRIVÉS (DÉMO)';
   section.appendChild(label);
 
   server.channels.forEach((dm) => {

@@ -293,6 +293,13 @@ function appendNewMessage(channelId, msg) {
 
 function sendMessage(content) {
   if (!_currentChannelId || !content.trim()) return;
+
+  if (window._socketClient?.isRealDmChannel(_currentChannelId)) {
+    window._socketClient.sendDm(content.trim());
+    clearReplyTarget();
+    return;
+  }
+
   const msg = pushMessage(_currentChannelId, content.trim());
   appendNewMessage(_currentChannelId, msg);
   clearReplyTarget();

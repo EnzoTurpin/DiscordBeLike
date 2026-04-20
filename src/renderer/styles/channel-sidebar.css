@@ -406,12 +406,6 @@
   line-height: 1.2;
 }
 
-.user-tag {
-  font-size: 11px;
-  color: var(--text-muted);
-  line-height: 1.2;
-}
-
 .user-controls {
   display: flex;
   gap: 2px;

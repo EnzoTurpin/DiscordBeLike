@@ -144,7 +144,6 @@ ipcMain.on('show-context-menu', (event, context) => {
 // IPC — config utilisateur
 ipcMain.handle('get-user-config', () => ({
   username: env.DISCORD_USERNAME || 'Utilisateur',
-  tag: env.DISCORD_TAG || '0000',
 }));
 
 app.whenReady().then(() => {
